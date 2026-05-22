@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EnsinoMoz — Plataforma de Ensino Secundário</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script type="module">
+// ═══════════════════════════════════════════════
+//  FIREBASE — Configuração do projecto EnsinoMoz
+// ═══════════════════════════════════════════════
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCHf03q-In_nqDn1rQxJdd-Fnh9gkoPaYI",
+  authDomain: "ensinomoz-87dc2.firebaseapp.com",
+  projectId: "ensinomoz-87dc2",
+  storageBucket: "ensinomoz-87dc2.firebasestorage.app",
+  messagingSenderId: "115177656465",
+  appId: "1:115177656465:web:f4df7750527734cc622f30"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// ── Utilizadores ──
+async function fbGetUsers(){
+  try{
+    const snap = await getDoc(doc(db,'ensinomoz','users'));
+    return snap.exists() ? (snap.data().list || []) : [];
+  }catch(e){return [];}
+}
+async function fbSaveUsers(list){
+  await setDoc(doc(db,'ensinomoz','users'), {list}, {merge:true});
+}
+
+// ── Documentos ──
+function docsDocId(){return 'docs-'+(window._cur?window._cur.cls+'-'+window._cur.id:'global');}
+async function fbGetDocs(){
+  try{
+    const snap = await getDoc(doc(db,'ensinomoz', docsDocId()));
+    return snap.exists() ? (snap.data().list || []) : [];
+  }catch(e){return [];}
+}
+async function fbSaveDocs(list){
+  await setDoc(doc(db,'ensinomoz', docsDocId()), {list}, {merge:true});
+}
+
+// ── Expõe funções ao escopo global ──
+window._fb = { fbGetUsers, fbSaveUsers, fbGetDocs, fbSaveDocs };
+window._fbReady = true;
+// Notifica o sistema que o Firebase está pronto
+document.dispatchEvent(new Event('fbReady'));
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E0E12; --paper:#F7F4EE; --cream:#EDE8DC; --mist:#D4CFCA;
+  --saffron:#E8842A; --cobalt:#1A4FBF; --sage:#3C7A5A;
+  --rose:#C94060; --gold:#C9A84C; --violet:#6B3FA0; --teal:#1A8A8A;
+  --saffron-t:#FDF2E8; --cobalt-t:#EAF0FC; --sage-t:#E8F4EE;
+  --rose-t:#FCE8EC; --gold-t:#FDF6E3; --violet-t:#F3EEFB; --teal-t:#E5F5F5;
+  --fd:'Fraunces',Georgia,serif; --fb:'DM Sans',sans-serif; --fm:'DM Mono',monospace;
+  --xs:.64rem; --sm:.8rem; --base:1rem; --md:1.25rem; --lg:1.563rem;
+  --xl:1.953rem; --2xl:2.441rem; --3xl:3.052rem;
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem;
+  --s6:2rem; --s7:3rem; --s8:4rem; --s9:6rem;
+  --r8:8px; --r16:16px; --rpill:999px;
+  --sh:0 2px 0 var(--ink),4px 6px 0 var(--ink);
+  --sh2:0 2px 0 var(--ink),7px 9px 0 var(--ink);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fb);background:var(--paper);color:var(--ink);font-size:var(--base);line-height:1.65;overflow-x:hidden;}
+.page{max-width:1200px;margin:0 auto;padding:0 var(--s6);}
+
+/* HEADER */
+header{background:var(--ink);padding:var(--s4) 0;position:sticky;top:0;z-index:200;}
+header .page{display:flex;align-items:center;gap:var(--s4);}
+.logo{font-family:var(--fd);font-size:var(--lg);font-weight:700;color:var(--paper);letter-spacing:-.02em;cursor:pointer;}
+.header-nav{display:flex;gap:var(--s3);margin-left:auto;flex-wrap:wrap;}
+.nav-btn{font-family:var(--fm);font-size:var(--xs);letter-spacing:.1em;text-transform:uppercase;color:#888;background:none;border:none;cursor:pointer;padding:var(--s2) var(--s3);border-radius:var(--r8);transition:all .15s;}
+.nav-btn:hover,.nav-btn.active{color:#fff;background:#333;}
+.breadcrumb{display:none;align-items:center;gap:var(--s2);margin-left:auto;font-family:var(--fm);font-size:var(--xs);color:#666;flex-wrap:wrap;}
+.bc-link{color:var(--saffron);cursor:pointer;}
+.bc-link:hover{color:#fff;}
+.back-btn{display:none;align-items:center;gap:.5rem;font-family:var(--fb);font-size:.8rem;font-weight:600;color:var(--paper);background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);padding:.5rem 1rem;border-radius:999px;cursor:pointer;transition:all .2s;white-space:nowrap;margin-left:auto;}
+.back-btn:hover{background:var(--saffron);border-color:var(--saffron);}
+
+/* VIEWS */
+.view{display:none;} .view.active{display:block;}
+
+/* HERO */
+.hero{padding:var(--s9) 0 var(--s8);position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 90% 50%,#EAF0FC,transparent 65%),radial-gradient(ellipse 40% 50% at 5% 85%,#FDF2E8,transparent 65%);z-index:0;}
+.hero-inner{position:relative;z-index:1;animation:fadeUp .6s ease both;}
+.eyebrow{font-family:var(--fm);font-size:var(--xs);letter-spacing:.2em;text-transform:uppercase;color:var(--cobalt);background:var(--cobalt-t);border:1px solid var(--cobalt);display:inline-flex;align-items:center;gap:var(--s2);padding:var(--s1) var(--s3);border-radius:var(--rpill);margin-bottom:var(--s4);}
+.hero h1{font-family:var(--fd);font-size:var(--3xl);font-weight:700;line-height:1.05;letter-spacing:-.02em;margin-bottom:var(--s4);max-width:18ch;}
+.hero h1 em{font-style:italic;color:var(--saffron);}
+.hero-desc{font-size:var(--md);font-weight:300;color:#4A4A55;max-width:52ch;line-height:1.7;margin-bottom:var(--s6);}
+.hero-stats{display:flex;gap:var(--s6);flex-wrap:wrap;}
+.stn{font-family:var(--fd);font-size:var(--2xl);font-weight:700;line-height:1;display:block;}
+.stl{font-family:var(--fm);font-size:var(--xs);letter-spacing:.1em;text-transform:uppercase;color:#999;}
+
+/* CYCLE TABS (home) */
+.cycle-tabs{background:var(--paper);border-bottom:1.5px solid var(--cream);position:sticky;top:62px;z-index:100;}
+.cycle-tabs .page{display:flex;gap:0;}
+.ctab{font-family:var(--fb);font-weight:600;font-size:var(--base);padding:var(--s4) var(--s6);border:none;background:none;cursor:pointer;color:#888;border-bottom:3px solid transparent;margin-bottom:-1.5px;transition:all .15s;display:flex;align-items:center;gap:var(--s3);}
+.ctab:hover{color:var(--ink);}
+.ctab.on{color:var(--ink);border-bottom-color:var(--ink);}
+.ctab .ctag{font-family:var(--fm);font-size:var(--xs);letter-spacing:.08em;text-transform:uppercase;padding:.15rem .5rem;border-radius:var(--rpill);font-weight:500;}
+
+/* CYCLE PANEL */
+.cpanel{display:none;padding:var(--s7) 0;}
+.cpanel.on{display:block;}
+
+/* CLASS SECTION */
+.class-block{margin-bottom:var(--s8);}
+.class-hdr{display:flex;align-items:center;gap:var(--s4);margin-bottom:var(--s5);padding:var(--s4) var(--s6);border-radius:var(--r16);border:1.5px solid var(--ink);}
+.class-num{font-family:var(--fd);font-size:var(--3xl);font-weight:700;line-height:1;color:var(--paper);}
+.class-label{color:var(--paper);}
+.class-label-main{font-family:var(--fd);font-size:var(--xl);font-weight:700;letter-spacing:-.01em;display:block;}
+.class-label-sub{font-family:var(--fm);font-size:var(--xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:.2rem;display:block;}
+.class-count{margin-left:auto;font-family:var(--fm);font-size:var(--xs);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);}
+
+/* SUBJECTS GRID */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:var(--s4);}
+
+/* SUBJECT CARD */
+.scard{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r16);box-shadow:var(--sh);overflow:hidden;transition:transform .18s,box-shadow .18s;cursor:pointer;display:flex;flex-direction:column;}
+.scard:hover{transform:translate(-2px,-2px);box-shadow:var(--sh2);}
+.scard-top{padding:var(--s4) var(--s5);display:flex;align-items:center;gap:var(--s3);border-bottom:1px solid var(--cream);}
+.scard-icon{width:44px;height:44px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;border:1.5px solid rgba(14,14,18,.08);}
+.scard-name{font-weight:700;font-size:var(--base);line-height:1.2;}
+.scard-body{padding:var(--s3) var(--s5) var(--s4);flex:1;display:flex;flex-direction:column;gap:var(--s3);}
+.scard-desc{font-size:var(--sm);color:#5A5A65;line-height:1.55;flex:1;}
+.scard-foot{display:flex;align-items:center;justify-content:space-between;}
+.badge{font-family:var(--fm);font-size:var(--xs);letter-spacing:.06em;text-transform:uppercase;padding:2px var(--s3);border-radius:var(--rpill);font-weight:500;}
+.arr{font-size:var(--sm);color:var(--mist);transition:color .15s,transform .15s;}
+.scard:hover .arr{color:var(--ink);transform:translateX(3px);}
+
+/* DISC VIEW */
+.dhero{padding:var(--s7) 0 var(--s6);border-bottom:1.5px solid var(--cream);}
+.dicon{width:72px;height:72px;border-radius:var(--r16);display:flex;align-items:center;justify-content:center;font-size:2rem;border:2px solid var(--ink);box-shadow:var(--sh);margin-bottom:var(--s4);}
+.dtitle{font-family:var(--fd);font-size:var(--2xl);font-weight:700;letter-spacing:-.02em;margin-bottom:var(--s2);}
+.dcycle{font-family:var(--fm);font-size:var(--xs);letter-spacing:.1em;text-transform:uppercase;margin-bottom:var(--s3);}
+.ddesc{font-size:var(--md);font-weight:300;color:#4A4A55;line-height:1.7;max-width:55ch;}
+.dstats{display:flex;gap:var(--s4);flex-wrap:wrap;margin-top:var(--s5);}
+.dstat{text-align:center;padding:var(--s3) var(--s5);background:#fff;border:1.5px solid var(--ink);border-radius:var(--r8);box-shadow:3px 3px 0 var(--ink);}
+.dsn{font-family:var(--fd);font-size:var(--lg);font-weight:700;line-height:1;display:block;}
+.dsl{font-family:var(--fm);font-size:var(--xs);letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:var(--s1);}
+
+/* DISC TABS */
+.tbar{background:var(--paper);border-bottom:1.5px solid var(--cream);position:sticky;top:62px;z-index:90;}
+.tbar .page{display:flex;overflow-x:auto;}
+.tab{font-family:var(--fb);font-weight:500;font-size:var(--sm);padding:var(--s4) var(--s5);border:none;background:none;cursor:pointer;color:#888;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:all .15s;white-space:nowrap;}
+.tab:hover{color:var(--ink);}
+.tab.on{color:var(--ink);border-bottom-color:var(--ink);}
+.tc{display:none;padding:var(--s7) 0;}
+.tc.on{display:block;}
+
+/* LESSONS */
+.section-title{font-family:var(--fd);font-size:var(--xl);font-weight:700;margin-bottom:var(--s5);letter-spacing:-.015em;}
+.llist{display:flex;flex-direction:column;gap:var(--s3);}
+.litem{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r16);box-shadow:var(--sh);overflow:hidden;}
+.lhdr{padding:var(--s4) var(--s6);display:flex;align-items:center;gap:var(--s4);cursor:pointer;}
+.lhdr:hover{background:var(--paper);}
+.lnum{font-family:var(--fm);font-size:var(--xs);color:#bbb;letter-spacing:.1em;flex-shrink:0;min-width:30px;}
+.lname{font-weight:600;font-size:var(--md);margin-bottom:.2rem;}
+.lmeta{display:flex;gap:var(--s3);font-family:var(--fm);font-size:var(--xs);color:#aaa;}
+.ltog{font-size:.9rem;color:var(--mist);transition:transform .3s;flex-shrink:0;}
+.ltog.open{transform:rotate(180deg);}
+.lbody{display:none;padding:0 var(--s6) var(--s5);border-top:1px solid var(--cream);}
+.lbody.open{display:block;padding-top:var(--s5);}
+.ldesc{font-size:var(--sm);color:#5A5A65;line-height:1.7;margin-bottom:var(--s5);}
+.vwrap{position:relative;padding-bottom:56.25%;height:0;border-radius:var(--r8);overflow:hidden;border:1.5px solid var(--cream);}
+.vwrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
+
+/* PDFs */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:var(--s4);}
+.pcard{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r16);box-shadow:var(--sh);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s3);transition:transform .18s,box-shadow .18s;}
+.pcard:hover{transform:translate(-2px,-2px);box-shadow:var(--sh2);}
+.picon{width:46px;height:46px;background:var(--rose-t);border:1.5px solid var(--rose);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
+.pname{font-weight:600;font-size:var(--sm);line-height:1.3;}
+.pinfo{font-family:var(--fm);font-size:var(--xs);color:#aaa;}
+.pacts{display:flex;gap:var(--s2);margin-top:auto;flex-wrap:wrap;}
+.btn-dl{display:inline-flex;align-items:center;gap:var(--s2);font-family:var(--fb);font-weight:600;font-size:var(--xs);background:var(--ink);color:var(--paper);padding:var(--s2) var(--s4);border:none;border-radius:var(--rpill);cursor:pointer;text-decoration:none;transition:background .15s;}
+.btn-dl:hover{background:var(--saffron);}
+.btn-o{display:inline-flex;align-items:center;gap:var(--s2);font-family:var(--fb);font-weight:500;font-size:var(--xs);background:transparent;color:var(--ink);padding:var(--s2) var(--s4);border:1.5px solid var(--mist);border-radius:var(--rpill);cursor:pointer;transition:all .15s;}
+.btn-o:hover{border-color:var(--ink);background:var(--cream);}
+
+/* FORMS */
+.msec{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r16);box-shadow:var(--sh);padding:var(--s6);margin-bottom:var(--s6);}
+.mtitle{font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:var(--s5);}
+.frow{display:flex;flex-direction:column;gap:var(--s2);margin-bottom:var(--s4);}
+.flabel{font-family:var(--fm);font-size:var(--xs);letter-spacing:.12em;text-transform:uppercase;color:#888;}
+.finput{font-family:var(--fb);font-size:var(--sm);padding:var(--s3) var(--s4);border:1.5px solid var(--mist);border-radius:var(--r8);background:var(--paper);color:var(--ink);outline:none;transition:border-color .15s;width:100%;}
+.finput:focus{border-color:var(--ink);}
+textarea.finput{min-height:80px;resize:vertical;}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4);}
+.fhint{font-family:var(--fm);font-size:var(--xs);color:#aaa;margin-top:var(--s1);}
+.facts{display:flex;gap:var(--s3);margin-top:var(--s5);flex-wrap:wrap;}
+.btn-p{display:inline-flex;align-items:center;gap:var(--s2);font-family:var(--fb);font-weight:600;font-size:var(--sm);background:var(--ink);color:var(--paper);padding:var(--s3) var(--s5);border:1.5px solid var(--ink);border-radius:var(--rpill);cursor:pointer;transition:background .15s;}
+.btn-p:hover{background:var(--saffron);border-color:var(--saffron);}
+.btn-q{display:inline-flex;align-items:center;gap:var(--s2);font-family:var(--fb);font-weight:500;font-size:var(--sm);background:transparent;color:var(--ink);padding:var(--s3) var(--s5);border:1.5px solid var(--mist);border-radius:var(--rpill);cursor:pointer;transition:all .15s;}
+.btn-q:hover{border-color:var(--ink);background:var(--cream);}
+
+/* EMPTY */
+.empty{text-align:center;padding:var(--s9) var(--s6);}
+.empty-icon{font-size:3rem;margin-bottom:var(--s4);}
+.empty-title{font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:var(--s3);}
+.empty-text{font-size:var(--sm);color:#888;line-height:1.7;max-width:36ch;margin:0 auto var(--s5);}
+
+/* SIMULADOR */
+.sim-wrap{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r16);box-shadow:var(--sh);overflow:hidden;}
+.sim-bar{background:var(--ink);padding:.9rem 1.5rem;display:flex;align-items:center;gap:.5rem;}
+.sim-dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
+.sim-body{padding:var(--s6);}
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s5);margin-bottom:var(--s5);}
+.sim-panel{background:var(--paper);padding:var(--s5);border-radius:var(--r8);border:1.5px solid var(--cream);}
+.sim-panel-title{font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:var(--s4);text-align:center;}
+.sim-result{background:var(--ink);color:var(--paper);border-radius:var(--r8);padding:var(--s5);margin-bottom:var(--s5);display:none;}
+.sim-rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--s4);margin-top:var(--s4);}
+.sim-ri{text-align:center;padding:var(--s3);background:rgba(255,255,255,.07);border-radius:var(--r8);}
+.sim-rl{font-family:var(--fm);font-size:var(--xs);color:#888;letter-spacing:.1em;text-transform:uppercase;margin-bottom:var(--s2);}
+.sim-rv{font-family:var(--fd);font-size:var(--xl);font-weight:700;}
+.sim-rs{font-size:var(--xs);color:#aaa;margin-top:.2rem;}
+.sim-table-wrap{overflow-x:auto;border:1.5px solid var(--cream);border-radius:var(--r8);}
+.sim-table{width:100%;border-collapse:collapse;font-size:var(--sm);}
+.sim-table th{padding:.7rem 1rem;text-align:left;font-family:var(--fm);font-size:var(--xs);letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:var(--paper);}
+.sim-table td{padding:.6rem 1rem;border-bottom:1px solid var(--cream);}
+.sim-table tr:last-child td{border-bottom:none;}
+.sim-table tr:nth-child(even) td{background:#fafafa;}
+
+/* TOAST */
+.toast{position:fixed;bottom:var(--s6);right:var(--s6);background:var(--ink);color:var(--paper);font-family:var(--fb);font-size:var(--sm);font-weight:500;padding:var(--s4) var(--s5);border-radius:var(--r8);box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:9999;transform:translateY(120%);opacity:0;transition:transform .3s,opacity .3s;display:flex;align-items:center;gap:var(--s3);}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* SIM NAV BUTTONS */
+.sim-nav-btn{font-family:var(--fb);font-weight:600;font-size:var(--sm);padding:var(--s3) var(--s5);border:1.5px solid var(--mist);border-radius:var(--rpill);background:#fff;color:#888;cursor:pointer;transition:all .15s;}
+.sim-nav-btn:hover{border-color:var(--ink);color:var(--ink);}
+.sim-nav-btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.sn-panel{animation:fadeUp .3s ease both;}
+
+hr.div{border:none;border-top:1.5px solid var(--cream);}
+
+footer{background:var(--ink);color:var(--paper);padding:var(--s7) 0;margin-top:var(--s8);}
+footer .page{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--s4);}
+.fbrand{font-family:var(--fd);font-size:var(--xl);font-weight:700;letter-spacing:-.02em;}
+.finfo{font-family:var(--fm);font-size:var(--xs);color:#555;text-transform:uppercase;letter-spacing:.1em;text-align:right;line-height:2;}
+
+/* ══ AUTH ══ */
+#authOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(14,14,18,.93);backdrop-filter:blur(6px);}
+#authOverlay.hidden{display:none;}
+.auth-box{background:var(--paper);border:2px solid var(--ink);border-radius:var(--r16);box-shadow:var(--sh2);width:100%;max-width:480px;overflow:hidden;}
+.auth-header{background:var(--ink);padding:1.5rem 2rem;text-align:center;}
+.auth-logo{font-family:var(--fd);font-size:var(--xl);font-weight:700;color:var(--paper);letter-spacing:-.02em;}
+.auth-sub{font-family:var(--fm);font-size:var(--xs);color:#888;letter-spacing:.1em;text-transform:uppercase;margin-top:.3rem;}
+.auth-tabs{display:flex;border-bottom:2px solid var(--cream);}
+.auth-tab{flex:1;padding:.9rem;font-family:var(--fb);font-weight:600;font-size:var(--sm);border:none;background:none;cursor:pointer;color:#888;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.auth-tab.on{color:var(--ink);border-bottom-color:var(--cobalt);}
+.auth-body{padding:1.75rem 2rem;}
+.auth-panel{display:none;}.auth-panel.on{display:block;}
+.auth-field{margin-bottom:1rem;}
+.auth-field label{display:block;font-family:var(--fm);font-size:var(--xs);letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:.4rem;}
+.auth-field input,.auth-field select{width:100%;padding:.7rem 1rem;border:1.5px solid var(--cream);border-radius:var(--r8);font-family:var(--fb);font-size:var(--sm);background:#fff;color:var(--ink);transition:border-color .2s;}
+.auth-field input:focus,.auth-field select:focus{outline:none;border-color:var(--cobalt);}
+.auth-field-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.auth-btn{width:100%;padding:.85rem;font-family:var(--fb);font-weight:700;font-size:var(--base);border:2px solid var(--ink);border-radius:var(--r8);background:var(--cobalt);color:#fff;cursor:pointer;transition:all .2s;margin-top:.5rem;box-shadow:var(--sh);}
+.auth-btn:hover{transform:translateY(-2px);box-shadow:var(--sh2);}
+.auth-msg{font-family:var(--fm);font-size:var(--xs);padding:.6rem 1rem;border-radius:var(--r8);margin-top:.75rem;display:none;}
+.auth-msg.ok{background:var(--sage-t);color:var(--sage);border:1px solid var(--sage);display:block;}
+.auth-msg.err{background:var(--rose-t);color:var(--rose);border:1px solid var(--rose);display:block;}
+#userBadge{display:none;align-items:center;gap:.6rem;font-family:var(--fm);font-size:var(--xs);color:#aaa;}
+#userBadge.show{display:flex;}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--cobalt);color:#fff;font-family:var(--fd);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.7rem;}
+.logout-btn{font-family:var(--fm);font-size:var(--xs);color:#888;background:none;border:1px solid #444;padding:.2rem .6rem;border-radius:var(--rpill);cursor:pointer;}
+.logout-btn:hover{color:#fff;border-color:#fff;}
+.doc-card{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);margin-bottom:.75rem;transition:all .2s;}
+.doc-card:hover{border-color:var(--cobalt);}
+.doc-icon{width:40px;height:40px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.doc-meta{flex:1;min-width:0;}
+.doc-name{font-weight:600;font-size:var(--sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.doc-by{font-family:var(--fm);font-size:var(--xs);color:#aaa;margin-top:.15rem;}
+.doc-dl{font-family:var(--fb);font-size:var(--xs);font-weight:600;color:var(--cobalt);background:var(--cobalt-t);border:1px solid var(--cobalt);padding:.35rem .85rem;border-radius:var(--rpill);cursor:pointer;white-space:nowrap;text-decoration:none;}
+.doc-dl:hover{background:var(--cobalt);color:#fff;}
+@media(max-width:768px){
+  .hero h1{font-size:var(--2xl);}
+  .sgrid,.pgrid{grid-template-columns:1fr;}
+  .fgrid,.sim-grid{grid-template-columns:1fr;}
+  .ctab{font-size:var(--sm);padding:var(--s3) var(--s4);}
+  .tab{font-size:var(--xs);padding:var(--s3) var(--s3);}
+  .class-hdr{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-header">
+      <div class="auth-logo">EnsinoMoz</div>
+      <div class="auth-sub">Plataforma de Ensino Secundário · Moçambique</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab on" onclick="authTab('login')">Entrar</button>
+      <button class="auth-tab" onclick="authTab('register')">Criar Conta</button>
+    </div>
+    <div class="auth-body">
+      <div class="auth-panel on" id="apLogin">
+        <div class="auth-field"><label>Email</label><input type="email" id="liEmail" placeholder="o.seu@email.com"></div>
+        <div class="auth-field"><label>Senha</label><input type="password" id="liPass" placeholder="••••••••"></div>
+        <button class="auth-btn" onclick="doLogin()">→ Entrar na Plataforma</button>
+        <div class="auth-msg" id="liMsg"></div>
+        <div style="text-align:center;margin-top:1rem;font-family:var(--fm);font-size:var(--xs);color:#888">Não tem conta? <a href="#" onclick="authTab('register');return false" style="color:var(--cobalt)">Cadastre-se gratuitamente</a></div>
+      </div>
+      <div class="auth-panel" id="apRegister">
+        <div class="auth-field-row">
+          <div class="auth-field"><label>Nome completo *</label><input type="text" id="rgNome" placeholder="Ex: Ana Machava"></div>
+          <div class="auth-field"><label>Email *</label><input type="email" id="rgEmail" placeholder="email@exemplo.com"></div>
+        </div>
+        <div class="auth-field-row">
+          <div class="auth-field"><label>Senha *</label><input type="password" id="rgPass" placeholder="mín. 6 caracteres"></div>
+          <div class="auth-field"><label>Confirmar Senha *</label><input type="password" id="rgPass2" placeholder="repetir senha"></div>
+        </div>
+        <div class="auth-field-row">
+          <div class="auth-field"><label>Profissão *</label>
+            <select id="rgProf"><option value="">Seleccionar…</option><option>Estudante</option><option>Professor(a)</option><option>Encarregado de Educação</option><option>Director(a) de Escola</option><option>Técnico de Educação</option><option>Outro</option></select>
+          </div>
+          <div class="auth-field"><label>Contacto *</label><input type="tel" id="rgTel" placeholder="+258 84 000 0000"></div>
+        </div>
+        <button class="auth-btn" style="background:var(--sage)" onclick="doRegister()">✓ Criar Conta Gratuita</button>
+        <div class="auth-msg" id="rgMsg"></div>
+        <div style="text-align:center;margin-top:1rem;font-family:var(--fm);font-size:var(--xs);color:#888">Já tem conta? <a href="#" onclick="authTab('login');return false" style="color:var(--cobalt)">Entrar</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="page">
+    <div class="logo" onclick="goHome()">EnsinoMoz</div>
+    <button class="back-btn" id="backBtn" onclick="goBackBtn()">← Voltar</button>
+    <div class="header-nav" id="hNav">
+      <button class="nav-btn active" onclick="showCycle('c1',this)">1º Ciclo</button>
+      <button class="nav-btn" onclick="showCycle('c2',this)">2º Ciclo</button>
+    </div>
+    <div class="breadcrumb" id="hBread">
+      <span class="bc-link" onclick="goHome()">Início</span>
+      <span style="color:#444"> › </span>
+      <span class="bc-link" id="hBreadCycle" onclick="goBackCycle()"></span>
+      <span style="color:#444" id="hSep2"> › </span>
+      <span id="hBreadDisc" style="color:#aaa"></span>
+    </div>
+    <div id="userBadge">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <span id="userName" style="color:#ccc;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ HOME VIEW ══════════ -->
+<div class="view active" id="vHome">
+
+  <section class="hero">
+    <div class="page">
+      <div class="hero-inner">
+        <span class="eyebrow">🇲🇿 Currículo Nacional · MINED · Moçambique</span>
+        <h1>Bem-vindo ao <em>EnsinoMoz</em></h1>
+        <p class="hero-desc">Plataforma de apoio ao ensino secundário com aulas, PDFs, vídeos e simuladores — organizada por ciclo e classe.</p>
+        <div class="hero-stats">
+          <div><span class="stn" style="color:var(--cobalt)">2</span><span class="stl">Ciclos</span></div>
+          <div><span class="stn" style="color:var(--sage)">6</span><span class="stl">Classes</span></div>
+          <div><span class="stn" style="color:var(--saffron)">27</span><span class="stl">Disciplinas</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CYCLE TABS -->
+  <div class="cycle-tabs">
+    <div class="page">
+      <button class="ctab on" id="ctab1" onclick="showCycle('c1',this)">
+        <span>📘</span>
+        <span>1º Ciclo</span>
+        <span class="ctag" style="background:var(--cobalt-t);color:var(--cobalt)">7ª · 8ª · 9ª Classe</span>
+      </button>
+      <button class="ctab" id="ctab2" onclick="showCycle('c2',this)">
+        <span>📗</span>
+        <span>2º Ciclo</span>
+        <span class="ctag" style="background:var(--sage-t);color:var(--sage)">10ª · 11ª · 12ª Classe</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ 1º CICLO ══ -->
+  <div class="cpanel on" id="c1">
+    <div class="page">
+
+      <!-- 7ª CLASSE -->
+      <div class="class-block">
+        <div class="class-hdr" style="background:var(--cobalt)">
+          <div class="class-num">7</div>
+          <div class="class-label">
+            <span class="class-label-main">Sétima Classe</span>
+            <span class="class-label-sub">1º Ciclo do Ensino Secundário</span>
+          </div>
+          <span class="class-count">12 disciplinas</span>
+        </div>
+        <div class="sgrid" id="g-7"></div>
+      </div>
+
+      <!-- 8ª CLASSE -->
+      <div class="class-block">
+        <div class="class-hdr" style="background:#1A5FBF">
+          <div class="class-num">8</div>
+          <div class="class-label">
+            <span class="class-label-main">Oitava Classe</span>
+            <span class="class-label-sub">1º Ciclo do Ensino Secundário</span>
+          </div>
+          <span class="class-count">12 disciplinas</span>
+        </div>
+        <div class="sgrid" id="g-8"></div>
+      </div>
+
+      <!-- 9ª CLASSE -->
+      <div class="class-block">
+        <div class="class-hdr" style="background:#1A3F9F">
+          <div class="class-num">9</div>
+          <div class="class-label">
+            <span class="class-label-main">Nona Classe</span>
+            <span class="class-label-sub">1º Ciclo do Ensino Secundário</span>
+          </div>
+          <span class="class-count">12 disciplinas</span>
+        </div>
+        <div class="sgrid" id="g-9"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ 2º CICLO ══ -->
+  <div class="cpanel" id="c2">
+    <div class="page">
+
+      <!-- 10ª CLASSE -->
+      <div class="class-block">
+        <div class="class-hdr" style="background:var(--sage)">
+          <div class="class-num">10</div>
+          <div class="class-label">
+            <span class="class-label-main">Décima Classe</span>
+            <span class="class-label-sub">2º Ciclo do Ensino Secundário</span>
+          </div>
+          <span class="class-count">14 disciplinas</span>
+        </div>
+        <div class="sgrid" id="g-10"></div>
+      </div>
+
+      <!-- 11ª CLASSE -->
+      <div class="class-block">
+        <div class="class-hdr" style="background:#2D6B4A">
+          <div class="class-num">11</div>
+          <div class="class-label">
+            <span class="class-label-main">Décima Primeira Classe</span>
+            <span class="class-label-sub">2º Ciclo do Ensino Secundário</span>
+          </div>
+          <span class="class-count">14 disciplinas</span>
+        </div>
+        <div class="sgrid" id="g-11"></div>
+      </div>
+
+      <!-- 12ª CLASSE -->
+      <div class="class-block">
+        <div class="class-hdr" style="background:#1E5238">
+          <div class="class-num">12</div>
+          <div class="class-label">
+            <span class="class-label-main">Décima Segunda Classe</span>
+            <span class="class-label-sub">2º Ciclo do Ensino Secundário</span>
+          </div>
+          <span class="class-count">14 disciplinas</span>
+        </div>
+        <div class="sgrid" id="g-12"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="page">
+      <div>
+        <div class="fbrand">EnsinoMoz</div>
+        <div style="font-family:var(--fm);font-size:var(--xs);color:#555;margin-top:.5rem">Ensino Secundário · Moçambique · 2026</div>
+      </div>
+      <div class="finfo">
+        <div>Baseado no PCESG · MINED Moçambique</div>
+        <div>1º Ciclo (7ª-9ª) · 2º Ciclo (10ª-12ª)</div>
+        <div>EnsinoMoz · Todos os direitos reservados</div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ══════════ DISCIPLINA VIEW ══════════ -->
+<div class="view" id="vDisc">
+
+  <div class="dhero" id="dHero"></div>
+
+  <div class="tbar">
+    <div class="page">
+      <button class="tab on" onclick="switchTab('aulas',this)">📚 Aulas</button>
+      <button class="tab" onclick="switchTab('pdfs',this)">📄 PDFs</button>
+      <button class="tab" id="tabSim" onclick="switchTab('sim',this)" style="display:none">⚛️ Simulador</button>
+      <button class="tab" onclick="switchTab('docs',this)">📁 Documentos</button>
+      <button class="tab" onclick="switchTab('gerir',this)">⚙️ Gerir Conteúdo</button>
+    </div>
+  </div>
+
+  <!-- TAB AULAS -->
+  <div class="tc on" id="tc-aulas">
+    <div class="page">
+      <h2 class="section-title" id="aulasTitle">Aulas</h2>
+      <div class="llist" id="lList"></div>
+      <div class="empty" id="lEmpty" style="display:none">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">Sem aulas ainda</div>
+        <p class="empty-text">Adicione a primeira aula no separador "⚙️ Gerir Conteúdo".</p>
+        <button class="btn-p" onclick="gotoGerir()">+ Adicionar aula</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB PDFs -->
+  <div class="tc" id="tc-pdfs">
+    <div class="page">
+      <h2 class="section-title" id="pdfsTitle">PDFs e Ficheiros</h2>
+      <div class="pgrid" id="pGrid"></div>
+      <div class="empty" id="pEmpty" style="display:none">
+        <div class="empty-icon">📂</div>
+        <div class="empty-title">Sem ficheiros ainda</div>
+        <p class="empty-text">Adicione PDFs no separador "⚙️ Gerir Conteúdo".</p>
+        <button class="btn-p" onclick="gotoGerir()">+ Adicionar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB SIMULADOR (Física 7ª/8ª = Newton+MRU | Física 12ª = Átomo) -->
+  <div class="tc" id="tc-sim">
+    <div class="page">
+
+      <!-- ════ CABEÇALHO DO SIMULADOR (dinâmico) ════ -->
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1.5px solid var(--cream)">
+        <div style="width:56px;height:56px;background:var(--cobalt-t);border:1.5px solid var(--cobalt);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.6rem" id="simHeaderIcon">⚛️</div>
+        <div>
+          <h2 style="font-family:var(--fd);font-size:var(--xl);font-weight:700;letter-spacing:-.015em;margin-bottom:.2rem" id="simHeaderTitle">Simulador</h2>
+          <div style="font-family:var(--fm);font-size:var(--xs);color:#aaa;letter-spacing:.08em" id="simHeaderSub">Física</div>
+        </div>
+        <span style="margin-left:auto;font-family:var(--fm);font-size:var(--xs);background:var(--cobalt-t);color:var(--cobalt);border:1.5px solid var(--cobalt);padding:.25rem .75rem;border-radius:var(--rpill);white-space:nowrap">⚡ Interactivo</span>
+      </div>
+
+      <!-- ════ PAINEL NEWTON (7ª e 8ª) ════ -->
+      <div id="simNewtonPanel" style="display:none">
+
+        <!-- Selector de simulação -->
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem">
+          <button class="sim-nav-btn on" onclick="showSimNewton('mrua',this)">🚗 MRU / MRUa</button>
+          <button class="sim-nav-btn" onclick="showSimNewton('lei1',this)">⚖️ 1ª Lei de Newton</button>
+          <button class="sim-nav-btn" onclick="showSimNewton('lei2',this)">🏋️ 2ª Lei de Newton</button>
+          <button class="sim-nav-btn" onclick="showSimNewton('lei3',this)">🤝 3ª Lei de Newton</button>
+        </div>
+
+        <!-- ── SIM 1: MRU / MRUa ── -->
+        <div id="sn-mrua" class="sn-panel">
+          <div class="sim-wrap">
+            <div class="sim-bar">
+              <span class="sim-dot" style="background:#ff5f57"></span>
+              <span class="sim-dot" style="background:#febc2e"></span>
+              <span class="sim-dot" style="background:#28c840"></span>
+              <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">MRU · MRUa — Cinemática</span>
+            </div>
+            <div class="sim-body">
+              <!-- Canvas animação -->
+              <canvas id="canvasMRUA" width="700" height="120" style="width:100%;border-radius:8px;background:#f0f4ff;border:1.5px solid var(--cream);margin-bottom:1.5rem;display:block"></canvas>
+              <div class="sim-grid">
+                <div class="sim-panel">
+                  <div class="sim-panel-title">🎛️ Parâmetros</div>
+                  <div class="frow">
+                    <label class="flabel">Tipo de movimento</label>
+                    <select class="finput" id="mruaTipo" onchange="resetMRUA()">
+                      <option value="mru">MRU — Velocidade constante</option>
+                      <option value="mrua">MRUa — Aceleração constante</option>
+                    </select>
+                  </div>
+                  <div class="frow">
+                    <label class="flabel">Posição inicial x₀ (m)</label>
+                    <input class="finput" type="number" id="mruaX0" value="0" step="1">
+                  </div>
+                  <div class="frow">
+                    <label class="flabel">Velocidade inicial v₀ (m/s)</label>
+                    <input class="finput" type="number" id="mruaV0" value="5" step="1">
+                  </div>
+                  <div class="frow" id="mruaARow">
+                    <label class="flabel">Aceleração a (m/s²)</label>
+                    <input class="finput" type="number" id="mruaA" value="2" step="0.5">
+                  </div>
+                  <div class="frow">
+                    <label class="flabel">Tempo total T (s)</label>
+                    <input class="finput" type="number" id="mruaT" value="6" step="1" min="1" max="30">
+                  </div>
+                  <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap">
+                    <button class="btn-p" onclick="calcMRUA()" style="flex:1;justify-content:center">▶ Simular</button>
+                    <button class="btn-q" onclick="resetMRUA()" style="flex:1;justify-content:center">↺ Reset</button>
+                  </div>
+                </div>
+                <div class="sim-panel">
+                  <div class="sim-panel-title">📊 Gráfico x(t) e v(t)</div>
+                  <canvas id="chartMRUA" style="max-height:260px"></canvas>
+                </div>
+              </div>
+              <div class="sim-result" id="mruaResult">
+                <div style="font-family:var(--fm);font-size:var(--xs);letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:.75rem">Resultados</div>
+                <div class="sim-rg" id="mruaRG"></div>
+              </div>
+              <!-- Tabela -->
+              <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin:1.5rem 0 1rem">Tabela t → x → v</div>
+              <div class="sim-table-wrap"><table class="sim-table"><thead><tr><th>t (s)</th><th>x (m)</th><th>v (m/s)</th><th>Δx (m)</th></tr></thead><tbody id="mruaTBody"></tbody></table></div>
+              <!-- Fórmulas -->
+              <div style="background:var(--cobalt-t);border:1.5px solid var(--cobalt);border-radius:var(--r8);padding:var(--s5);margin-top:1.5rem">
+                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:var(--s3);color:var(--cobalt)">📐 Fórmulas</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--s4);font-size:var(--sm)">
+                  <div><b>MRU — posição:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(26,79,191,.1);padding:.2rem .5rem;border-radius:4px">x = x₀ + v₀ · t</code></div>
+                  <div><b>MRUa — posição:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(26,79,191,.1);padding:.2rem .5rem;border-radius:4px">x = x₀ + v₀t + ½at²</code></div>
+                  <div><b>MRUa — velocidade:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(26,79,191,.1);padding:.2rem .5rem;border-radius:4px">v = v₀ + a · t</code></div>
+                  <div><b>Torricelli:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(26,79,191,.1);padding:.2rem .5rem;border-radius:4px">v² = v₀² + 2a·Δx</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SIM 2: 1ª Lei (Inércia) ── -->
+        <div id="sn-lei1" class="sn-panel" style="display:none">
+          <div class="sim-wrap">
+            <div class="sim-bar">
+              <span class="sim-dot" style="background:#ff5f57"></span>
+              <span class="sim-dot" style="background:#febc2e"></span>
+              <span class="sim-dot" style="background:#28c840"></span>
+              <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">1ª Lei de Newton — Princípio da Inércia</span>
+            </div>
+            <div class="sim-body">
+              <div style="background:var(--cobalt-t);border:1.5px solid var(--cobalt);border-radius:var(--r8);padding:var(--s5);margin-bottom:1.5rem">
+                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;color:var(--cobalt);margin-bottom:.5rem">📖 Enunciado</div>
+                <p style="font-size:var(--sm);line-height:1.7;color:#333"><em>"Todo o corpo permanece em repouso ou em movimento rectilíneo uniforme enquanto a força resultante que actua sobre ele for nula."</em></p>
+              </div>
+              <!-- Canvas animação inércia -->
+              <canvas id="canvasLei1" width="700" height="130" style="width:100%;border-radius:8px;background:#f5f0ff;border:1.5px solid var(--cream);margin-bottom:1.5rem;display:block"></canvas>
+              <div class="sim-grid">
+                <div class="sim-panel">
+                  <div class="sim-panel-title">🎛️ Cenário</div>
+                  <div class="frow">
+                    <label class="flabel">Estado inicial</label>
+                    <select class="finput" id="lei1Estado" onchange="resetLei1()">
+                      <option value="repouso">Corpo em repouso (F=0)</option>
+                      <option value="mru">Corpo em MRU (F=0)</option>
+                    </select>
+                  </div>
+                  <div class="frow" id="lei1VRow">
+                    <label class="flabel">Velocidade (m/s)</label>
+                    <input class="finput" type="number" id="lei1V" value="4" step="1">
+                  </div>
+                  <div class="frow">
+                    <label class="flabel">Massa do corpo (kg)</label>
+                    <input class="finput" type="number" id="lei1M" value="5" step="1" min="1">
+                  </div>
+                  <div style="background:var(--rose-t);border:1px solid var(--rose);border-radius:var(--r8);padding:var(--s4);margin-top:.75rem;font-size:var(--xs);color:var(--rose);line-height:1.7">
+                    ⚖️ <b>Força Resultante = 0 N</b><br>O corpo não acelera. A massa <b>não</b> influencia o estado de movimento quando F=0.
+                  </div>
+                  <button class="btn-p" onclick="animLei1()" style="width:100%;justify-content:center;margin-top:1rem">▶ Animar</button>
+                  <button class="btn-q" onclick="resetLei1()" style="width:100%;justify-content:center;margin-top:.5rem">↺ Reset</button>
+                </div>
+                <div class="sim-panel">
+                  <div class="sim-panel-title">📊 Gráfico de Forças</div>
+                  <canvas id="chartLei1" style="max-height:260px"></canvas>
+                  <div style="margin-top:1rem;font-size:var(--xs);color:#666;line-height:1.8">
+                    <div>🔵 Peso (P = m·g) ↓</div>
+                    <div>🟢 Normal (N) ↑</div>
+                    <div>🔴 Força Resultante (FR) = P + N = <b>0</b></div>
+                  </div>
+                </div>
+              </div>
+              <!-- Exemplos do quotidiano -->
+              <div style="margin-top:1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem">
+                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🚗</div><b>Carro a travar</b><br>Passageiros continuam em movimento — inércia!</div>
+                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">⚽</div><b>Bola no espaço</b><br>Sem atrito nem gravidade, move-se para sempre.</div>
+                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">📚</div><b>Livro na mesa</b><br>Em repouso porque N + P = 0. Inércia de repouso.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SIM 3: 2ª Lei (F=ma) ── -->
+        <div id="sn-lei2" class="sn-panel" style="display:none">
+          <div class="sim-wrap">
+            <div class="sim-bar">
+              <span class="sim-dot" style="background:#ff5f57"></span>
+              <span class="sim-dot" style="background:#febc2e"></span>
+              <span class="sim-dot" style="background:#28c840"></span>
+              <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">2ª Lei de Newton — F = m·a</span>
+            </div>
+            <div class="sim-body">
+              <div style="background:var(--sage-t);border:1.5px solid var(--sage);border-radius:var(--r8);padding:var(--s5);margin-bottom:1.5rem">
+                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;color:var(--sage);margin-bottom:.5rem">📖 Enunciado</div>
+                <p style="font-size:var(--sm);line-height:1.7;color:#333"><em>"A aceleração de um corpo é directamente proporcional à força resultante que actua sobre ele e inversamente proporcional à sua massa."</em><br><strong style="font-size:var(--md)">F = m · a</strong></p>
+              </div>
+              <canvas id="canvasLei2" width="700" height="130" style="width:100%;border-radius:8px;background:#f0fff4;border:1.5px solid var(--cream);margin-bottom:1.5rem;display:block"></canvas>
+              <div class="sim-grid">
+                <div class="sim-panel">
+                  <div class="sim-panel-title">🎛️ Parâmetros</div>
+                  <div class="frow">
+                    <label class="flabel">Massa m (kg)</label>
+                    <input class="finput" type="range" id="lei2M" min="1" max="20" value="5" oninput="lei2Update()">
+                    <div style="text-align:center;font-family:var(--fm);font-size:var(--sm);font-weight:700;margin-top:.3rem" id="lei2MVal">5 kg</div>
+                  </div>
+                  <div class="frow">
+                    <label class="flabel">Força F (N)</label>
+                    <input class="finput" type="range" id="lei2F" min="1" max="100" value="20" oninput="lei2Update()">
+                    <div style="text-align:center;font-family:var(--fm);font-size:var(--sm);font-weight:700;margin-top:.3rem" id="lei2FVal">20 N</div>
+                  </div>
+                  <div style="background:var(--ink);color:var(--paper);border-radius:var(--r8);padding:1rem;margin-top:1rem;text-align:center">
+                    <div style="font-family:var(--fm);font-size:var(--xs);color:#888;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Aceleração resultante</div>
+                    <div style="font-family:var(--fd);font-size:var(--2xl);font-weight:700" id="lei2AVal">4,00 m/s²</div>
+                    <div style="font-size:var(--xs);color:#aaa;margin-top:.3rem">a = F / m</div>
+                  </div>
+                  <button class="btn-p" onclick="animLei2()" style="width:100%;justify-content:center;margin-top:1rem">▶ Animar</button>
+                  <button class="btn-q" onclick="resetLei2()" style="width:100%;justify-content:center;margin-top:.5rem">↺ Reset</button>
+                </div>
+                <div class="sim-panel">
+                  <div class="sim-panel-title">📊 a × m (F fixo) e a × F (m fixo)</div>
+                  <canvas id="chartLei2" style="max-height:260px"></canvas>
+                </div>
+              </div>
+              <!-- Tabela F,m → a -->
+              <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin:1.5rem 0 1rem">Tabela F × m → a</div>
+              <div class="sim-table-wrap"><table class="sim-table"><thead><tr><th>F (N)</th><th>m (kg)</th><th>a (m/s²)</th><th>Observação</th></tr></thead><tbody id="lei2TBody"></tbody></table></div>
+              <div style="background:var(--sage-t);border:1.5px solid var(--sage);border-radius:var(--r8);padding:var(--s5);margin-top:1.5rem">
+                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:var(--s3);color:var(--sage)">📐 Fórmulas derivadas</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--s4);font-size:var(--sm)">
+                  <div><b>Força:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">F = m · a (N)</code></div>
+                  <div><b>Massa:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">m = F / a (kg)</code></div>
+                  <div><b>Aceleração:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">a = F / m (m/s²)</code></div>
+                  <div><b>Peso:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">P = m · g (g≈10)</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SIM 4: 3ª Lei (Acção-Reacção) ── -->
+        <div id="sn-lei3" class="sn-panel" style="display:none">
+          <div class="sim-wrap">
+            <div class="sim-bar">
+              <span class="sim-dot" style="background:#ff5f57"></span>
+              <span class="sim-dot" style="background:#febc2e"></span>
+              <span class="sim-dot" style="background:#28c840"></span>
+              <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">3ª Lei de Newton — Acção e Reacção</span>
+            </div>
+            <div class="sim-body">
+              <div style="background:var(--rose-t);border:1.5px solid var(--rose);border-radius:var(--r8);padding:var(--s5);margin-bottom:1.5rem">
+                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;color:var(--rose);margin-bottom:.5rem">📖 Enunciado</div>
+                <p style="font-size:var(--sm);line-height:1.7;color:#333"><em>"Para toda a acção existe uma reacção igual em módulo, oposta em sentido e na mesma direcção, mas aplicada em corpos diferentes."</em><br><strong>F₁₂ = −F₂₁</strong></p>
+              </div>
+              <canvas id="canvasLei3" width="700" height="150" style="width:100%;border-radius:8px;background:#fff0f3;border:1.5px solid var(--cream);margin-bottom:1.5rem;display:block"></canvas>
+              <div class="sim-grid">
+                <div class="sim-panel">
+                  <div class="sim-panel-title">🎛️ Parâmetros</div>
+                  <div class="frow">
+                    <label class="flabel">Cenário</label>
+                    <select class="finput" id="lei3Cena" onchange="resetLei3()">
+                      <option value="blocos">Dois blocos em contacto</option>
+                      <option value="foguete">Foguete / propulsão</option>
+                      <option value="pulo">Pessoa a saltar do barco</option>
+                    </select>
+                  </div>
+                  <div class="frow">
+                    <label class="flabel">Massa do Corpo A (kg)</label>
+                    <input class="finput" type="number" id="lei3MA" value="5" step="1" min="1">
+                  </div>
+                  <div class="frow">
+                    <label class="flabel">Massa do Corpo B (kg)</label>
+                    <input class="finput" type="number" id="lei3MB" value="3" step="1" min="1">
+                  </div>
+                  <div class="frow">
+                    <label class="flabel">Força de Acção F (N)</label>
+                    <input class="finput" type="number" id="lei3F" value="15" step="1" min="1">
+                  </div>
+                  <div style="display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap">
+                    <button class="btn-p" onclick="calcLei3()" style="flex:1;justify-content:center">⚡ Calcular</button>
+                    <button class="btn-q" onclick="resetLei3()" style="flex:1;justify-content:center">↺ Reset</button>
+                  </div>
+                </div>
+                <div class="sim-panel">
+                  <div class="sim-panel-title">📊 Forças de Acção e Reacção</div>
+                  <canvas id="chartLei3" style="max-height:260px"></canvas>
+                  <div class="sim-result" id="lei3Result" style="margin-top:1rem">
+                    <div class="sim-rg" id="lei3RG"></div>
+                  </div>
+                </div>
+              </div>
+              <!-- Exemplos -->
+              <div style="margin-top:1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem">
+                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🚀</div><b>Foguete</b><br>Gases expulsos para baixo → foguete sobe.</div>
+                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🏊</div><b>Natação</b><br>Nadador empurra água para trás → avança.</div>
+                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🦅</div><b>Pássaro a voar</b><br>Asas empurram ar para baixo → sobe.</div>
+                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🔫</div><b>Recuo da arma</b><br>Bala para a frente → arma recua.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /simNewtonPanel -->
+
+      <!-- ════ PAINEL ÁTOMO (12ª) ════ -->
+      <div id="simAtomPanel" style="display:none">
+        <div style="margin-bottom:1rem;font-family:var(--fm);font-size:var(--xs);color:#aaa;letter-spacing:.08em">Modelação Computacional · Átomo de Hidrogénio · Física 12ª Classe</div>
+        <div class="sim-wrap">
+          <div class="sim-bar">
+            <span class="sim-dot" style="background:#ff5f57"></span>
+            <span class="sim-dot" style="background:#febc2e"></span>
+            <span class="sim-dot" style="background:#28c840"></span>
+            <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">Níveis de Energia — Átomo de Hidrogénio</span>
+          </div>
+          <div class="sim-body">
+            <div class="sim-grid">
+              <div class="sim-panel">
+                <div class="sim-panel-title">📊 Gráfico de Níveis de Energia</div>
+                <canvas id="simChart" style="max-height:300px"></canvas>
+              </div>
+              <div class="sim-panel">
+                <div class="sim-panel-title">🎛️ Simular Transição</div>
+                <div class="frow">
+                  <label class="flabel">Nível Inicial nᵢ (maior)</label>
+                  <select class="finput" id="simNi">
+                    <option value="2">n = 2</option>
+                    <option value="3" selected>n = 3</option>
+                    <option value="4">n = 4</option>
+                    <option value="5">n = 5</option>
+                    <option value="6">n = 6</option>
+                  </select>
+                </div>
+                <div class="frow">
+                  <label class="flabel">Nível Final n_f (menor)</label>
+                  <select class="finput" id="simNf">
+                    <option value="1" selected>n = 1</option>
+                    <option value="2">n = 2</option>
+                    <option value="3">n = 3</option>
+                    <option value="4">n = 4</option>
+                    <option value="5">n = 5</option>
+                  </select>
+                </div>
+                <button class="btn-p" style="width:100%;justify-content:center" onclick="simCalc()">⚡ Calcular Transição</button>
+                <div style="background:var(--cobalt-t);border:1px solid var(--cobalt);border-radius:var(--r8);padding:var(--s4);margin-top:var(--s4)">
+                  <div style="font-weight:600;font-size:var(--sm);margin-bottom:.5rem;color:var(--cobalt)">Séries Espectrais</div>
+                  <div style="font-size:var(--xs);line-height:2;color:#444">
+                    <div>🟣 <b>Lyman</b> → nf=1 · Ultravioleta</div>
+                    <div>🔵 <b>Balmer</b> → nf=2 · Visível</div>
+                    <div>🔴 <b>Paschen</b> → nf=3 · Infravermelho</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sim-result" id="simResult">
+              <div style="font-family:var(--fm);font-size:var(--xs);letter-spacing:.12em;text-transform:uppercase;color:#666">Resultado da Transição</div>
+              <div class="sim-rg" id="simRG"></div>
+            </div>
+            <div style="background:var(--sage-t);border:1.5px solid var(--sage);border-radius:var(--r8);padding:var(--s5);margin-bottom:var(--s5)">
+              <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:var(--s3);color:var(--sage)">📐 Fórmulas</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:var(--s4);font-size:var(--sm)">
+                <div><b>Energia do nível:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">Eₙ = −13,6 / n² (eV)</code></div>
+                <div><b>Energia da transição:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">ΔE = |Eᵢ − E_f| (eV)</code></div>
+                <div><b>Comprimento de onda:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">λ = hc / ΔE (nm)</code></div>
+              </div>
+            </div>
+            <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:var(--s4)">Tabela de Transições Espectrais</div>
+            <div class="sim-table-wrap">
+              <table class="sim-table">
+                <thead><tr><th>Série</th><th>Transição</th><th>ΔE (eV)</th><th>λ (nm)</th><th>Região</th></tr></thead>
+                <tbody id="simTBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- /simAtomPanel -->
+
+    </div>
+  </div>
+
+  <!-- TAB DOCUMENTOS -->
+  <div class="tc" id="tc-docs">
+    <div class="page">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1.5px solid var(--cream)">
+        <div style="width:56px;height:56px;background:var(--gold-t);border:1.5px solid var(--gold);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.6rem">📁</div>
+        <div><h2 style="font-family:var(--fd);font-size:var(--xl);font-weight:700;margin-bottom:.2rem">Documentos da Comunidade</h2><div style="font-family:var(--fm);font-size:var(--xs);color:#aaa">Partilha de Materiais</div></div>
+        <span id="docsUserBadge" style="margin-left:auto;font-family:var(--fm);font-size:var(--xs);background:var(--sage-t);color:var(--sage);border:1.5px solid var(--sage);padding:.25rem .75rem;border-radius:var(--rpill);white-space:nowrap"></span>
+      </div>
+      <div style="margin-bottom:2rem">
+        <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:1rem">📤 Enviar Documento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="frow"><label class="flabel">Nome *</label><input class="finput" id="docNome" placeholder="Ex: Resumo Capítulo 4"></div>
+          <div class="frow"><label class="flabel">Tipo</label><select class="finput" id="docTipo"><option value="📋">📋 Resumo</option><option value="✏️">✏️ Exercícios</option><option value="📝">📝 Exame</option><option value="📚">📚 Livro</option><option value="📎">📎 Outro</option></select></div>
+        </div>
+        <div class="frow" style="margin-bottom:1rem"><label class="flabel">Link (Google Drive, Dropbox…) *</label><input class="finput" id="docLink" placeholder="https://drive.google.com/..."></div>
+        <div class="frow" style="margin-bottom:1rem"><label class="flabel">Descrição (opcional)</label><input class="finput" id="docDesc" placeholder="Breve descrição…"></div>
+        <button class="btn-p" onclick="docEnviar()" style="background:var(--sage);border-color:var(--sage)">📤 Enviar Documento</button>
+        <div id="docMsg" style="display:none;margin-top:.75rem;font-family:var(--fm);font-size:var(--xs);padding:.6rem 1rem;border-radius:var(--r8)"></div>
+      </div>
+      <div>
+        <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:1rem">📥 Documentos Disponíveis</div>
+        <div id="docList"></div>
+        <div id="docEmpty" style="display:none;text-align:center;padding:3rem;color:#aaa"><div style="font-size:3rem">📭</div><div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-top:1rem">Nenhum documento ainda</div><div style="font-size:var(--sm);margin-top:.5rem">Seja o primeiro a partilhar!</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB GERIR -->
+  <div class="tc" id="tc-gerir">
+    <div class="page">
+      <div class="msec">
+        <div class="mtitle">➕ Adicionar Nova Aula</div>
+        <div class="fgrid">
+          <div class="frow"><label class="flabel">Título da Aula *</label><input class="finput" id="faTitulo" placeholder="Ex: Lei de Coulomb"></div>
+          <div class="frow"><label class="flabel">Duração (min)</label><input class="finput" id="faDur" type="number" placeholder="45"></div>
+        </div>
+        <div class="frow"><label class="flabel">Descrição / Conteúdo</label><textarea class="finput" id="faDesc" placeholder="Descreva os tópicos desta aula..."></textarea></div>
+        <div class="frow">
+          <label class="flabel">🎬 Link YouTube (opcional)</label>
+          <input class="finput" id="faVideo" placeholder="https://www.youtube.com/watch?v=...">
+          <span class="fhint">Cole o link do YouTube — o vídeo fica incorporado automaticamente.</span>
+        </div>
+        <div class="facts">
+          <button class="btn-p" onclick="addLesson()">✓ Guardar Aula</button>
+          <button class="btn-q" onclick="clearLF()">Limpar</button>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="mtitle">📄 Adicionar PDF / Ficheiro</div>
+        <div class="fgrid">
+          <div class="frow"><label class="flabel">Nome do Ficheiro *</label><input class="finput" id="fpNome" placeholder="Ex: Resumo — Capítulo 3"></div>
+          <div class="frow"><label class="flabel">Tipo</label>
+            <select class="finput" id="fpTipo">
+              <option value="Resumo">📋 Resumo</option>
+              <option value="Exercícios">✏️ Exercícios</option>
+              <option value="Exame">📝 Exame / Teste</option>
+              <option value="Livro">📚 Livro / Manual</option>
+              <option value="Outro">📎 Outro</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow">
+          <label class="flabel">Link de Download (Google Drive, Dropbox…)</label>
+          <input class="finput" id="fpLink" placeholder="https://drive.google.com/...">
+          <span class="fhint">Partilhe com acesso público e cole o link aqui.</span>
+        </div>
+        <div class="frow"><label class="flabel">Tamanho / Páginas (opcional)</label><input class="finput" id="fpSize" placeholder="Ex: 2.4 MB · 18 páginas"></div>
+        <div class="facts">
+          <button class="btn-p" onclick="addPDF()">✓ Guardar PDF</button>
+          <button class="btn-q" onclick="clearPF()">Limpar</button>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="mtitle">🗂️ Conteúdo Actual</div>
+        <div id="mList"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /vDisc -->
+
+<div class="toast" id="toast"><span id="tIcon">✓</span><span id="tMsg">Guardado!</span></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DADOS DAS DISCIPLINAS
+// ═══════════════════════════════════════════════
+
+// Disciplinas do 1º ciclo (7ª, 8ª, 9ª classe)
+const C1_SUBS = [
+  {id:'port',   icon:'📖', name:'Português',                  desc:'Língua oficial de ensino. Leitura, escrita, oralidade e análise de textos literários e não literários.',     badge:'Obrigatória', bg:'var(--sage-t)',     c:'var(--sage)'},
+  {id:'mat',    icon:'📐', name:'Matemática',                 desc:'Aritmética, álgebra, geometria e introdução às funções. Base para o raciocínio lógico e científico.',        badge:'Obrigatória', bg:'var(--cobalt-t)',   c:'var(--cobalt)'},
+  {id:'ing',    icon:'🌐', name:'Inglês',                     desc:'Língua estrangeira prioritária. Comunicação básica e funcional, vocabulário e gramática aplicada.',          badge:'Obrigatória', bg:'var(--cobalt-t)',   c:'var(--cobalt)'},
+  {id:'fra',    icon:'🗼', name:'Francês',                    desc:'Segunda língua estrangeira. Relevante para integração regional na SADC e União Africana.',                  badge:'Obrigatória', bg:'var(--rose-t)',     c:'var(--rose)'},
+  {id:'fis',    icon:'⚡', name:'Física',                     desc:'Mecânica, calor, electricidade e óptica. Método científico aplicado aos fenómenos naturais.',               badge:'Obrigatória', bg:'var(--cobalt-t)',   c:'var(--cobalt)', sim:true},
+  {id:'qui',    icon:'⚗️', name:'Química',                    desc:'Estrutura da matéria, reações químicas, tabela periódica e introdução à química orgânica.',                 badge:'Obrigatória', bg:'var(--saffron-t)', c:'var(--saffron)'},
+  {id:'hist',   icon:'📜', name:'História',                   desc:'História de Moçambique, África e o mundo. Destaque para a luta de libertação nacional.',                    badge:'Obrigatória', bg:'var(--rose-t)',     c:'var(--rose)'},
+  {id:'geo',    icon:'🗺️', name:'Geografia',                  desc:'Geografia física e humana. Cartografia, relevo, clima, população e recursos naturais de Moçambique.',       badge:'Obrigatória', bg:'var(--saffron-t)', c:'var(--saffron)'},
+  {id:'des',    icon:'✏️', name:'Desenho',                    desc:'Desenho técnico e artístico. Perspectiva, geometria descritiva e representação gráfica de formas.',         badge:'Obrigatória', bg:'var(--gold-t)',     c:'var(--gold)'},
+  {id:'emp1',   icon:'💡', name:'Noções de Empreendedorismo', desc:'Fundamentos de negócios, identificação de oportunidades e iniciativa empreendedora no contexto moçambicano.',badge:'Obrigatória', bg:'var(--gold-t)',     c:'var(--gold)'},
+  {id:'tic1',   icon:'💻', name:"TIC's",                      desc:'Tecnologias de Informação e Comunicação. Literacia digital, software básico e uso responsável da internet.', badge:'Obrigatória', bg:'var(--saffron-t)', c:'var(--saffron)'},
+  {id:'edf1',   icon:'⚽', name:'Educação Física',            desc:'Desenvolvimento motor, desporto colectivo e individual, saúde e valores como respeito e trabalho em equipa.',badge:'Obrigatória', bg:'var(--teal-t)',     c:'var(--teal)'},
+];
+
+// Disciplinas do 2º ciclo (10ª, 11ª, 12ª classe)
+const C2_SUBS = [
+  {id:'port2',  icon:'📖', name:'Português',                  desc:'Aprofundamento da língua. Análise literária, produção de textos académicos e comunicação formal.',          badge:'Obrigatória', bg:'var(--sage-t)',     c:'var(--sage)'},
+  {id:'mat2',   icon:'📐', name:'Matemática',                 desc:'Funções, trigonometria, cálculo, probabilidade e estatística. Essencial para o ensino superior.',           badge:'Obrigatória', bg:'var(--cobalt-t)',   c:'var(--cobalt)'},
+  {id:'filo',   icon:'💭', name:'Filosofia',                  desc:'Ética, lógica, epistemologia, filosofia africana e contemporânea. Desenvolvimento do pensamento crítico.',   badge:'Obrigatória', bg:'var(--violet-t)',   c:'var(--violet)'},
+  {id:'psico',  icon:'🧠', name:'Psicopedagogia',             desc:'Fundamentos da psicologia da aprendizagem, desenvolvimento humano e práticas pedagógicas.',                 badge:'Obrigatória', bg:'var(--violet-t)',   c:'var(--violet)'},
+  {id:'ing2',   icon:'🌐', name:'Inglês',                     desc:'Comunicação avançada, compreensão de textos autênticos, gramática e preparação para contextos profissionais.',badge:'Obrigatória', bg:'var(--cobalt-t)',   c:'var(--cobalt)'},
+  {id:'fra2',   icon:'🗼', name:'Francês',                    desc:'Aprofundamento do idioma. Comunicação oral e escrita, cultura francófona e integração regional.',           badge:'Obrigatória', bg:'var(--rose-t)',     c:'var(--rose)'},
+  {id:'fis2',   icon:'⚡', name:'Física',                     desc:'Física moderna, termodinâmica, electromagnetismo e óptica avançada. Inclui simulador de níveis de energia.', badge:'Obrigatória', bg:'var(--cobalt-t)',   c:'var(--cobalt)', sim:true},
+  {id:'qui2',   icon:'⚗️', name:'Química',                    desc:'Química orgânica, estequiometria, electroquímica e ligações químicas avançadas.',                           badge:'Obrigatória', bg:'var(--saffron-t)', c:'var(--saffron)'},
+  {id:'hist2',  icon:'📜', name:'História',                   desc:'História contemporânea, globalização, pós-colonialismo e Moçambique no século XXI.',                        badge:'Obrigatória', bg:'var(--rose-t)',     c:'var(--rose)'},
+  {id:'geo2',   icon:'🗺️', name:'Geografia',                  desc:'Geopolítica, globalização, ambiente e desenvolvimento sustentável com foco em África e Moçambique.',        badge:'Obrigatória', bg:'var(--saffron-t)', c:'var(--saffron)'},
+  {id:'dgd',    icon:'📊', name:'DGD',                        desc:'Desenvolvimento, Gestão e Desenvolvimento. Organização, planeamento e gestão de projectos e recursos.',      badge:'Obrigatória', bg:'var(--gold-t)',     c:'var(--gold)'},
+  {id:'emp2',   icon:'💡', name:'Noções de Empreendedorismo', desc:'Plano de negócios, gestão financeira básica, inovação e criação de empresas no contexto moçambicano.',      badge:'Obrigatória', bg:'var(--gold-t)',     c:'var(--gold)'},
+  {id:'tic2',   icon:'💻', name:"TIC's",                      desc:'Programação básica, bases de dados, segurança digital e uso avançado de ferramentas tecnológicas.',         badge:'Obrigatória', bg:'var(--saffron-t)', c:'var(--saffron)'},
+  {id:'edf2',   icon:'⚽', name:'Educação Física',            desc:'Desporto avançado, saúde, bem-estar e liderança. Preparação física e valores olímpicos.',                   badge:'Obrigatória', bg:'var(--teal-t)',     c:'var(--teal)'},
+];
+
+// ═══════════════════════════════════════════════
+//  BASE DE DADOS LOCAL
+// ═══════════════════════════════════════════════
+let DB={};
+try{DB=JSON.parse(localStorage.getItem('ensinomoz_v2')||'{}');}catch(e){}
+function save(){try{localStorage.setItem('ensinomoz_v2',JSON.stringify(DB));}catch(e){}}
+function gd(id){if(!DB[id])DB[id]={l:[],p:[]};return DB[id];}
+
+let cur=null;
+let curCycle='c1';
+
+// ═══════════════════════════════════════════════
+//  RENDER HOME
+// ═══════════════════════════════════════════════
+function renderHome(){
+  // 1º ciclo: mesmas disciplinas para 7ª, 8ª e 9ª
+  ['7','8','9'].forEach(cls=>{
+    const g=document.getElementById('g-'+cls);
+    if(!g)return;
+    g.innerHTML=C1_SUBS.map(s=>cardHTML(s,cls,'c1')).join('');
+  });
+  // 2º ciclo: mesmas disciplinas para 10ª, 11ª e 12ª
+  ['10','11','12'].forEach(cls=>{
+    const g=document.getElementById('g-'+cls);
+    if(!g)return;
+    g.innerHTML=C2_SUBS.map(s=>cardHTML(s,cls,'c2')).join('');
+  });
+}
+
+function cardHTML(s,cls,cycle){
+  const uid=s.id+'_'+cls; // id único: disciplina + classe
+  const d=gd(uid);
+  return`<div class="scard" onclick="openSub('${s.id}','${cls}','${cycle}')">
+    <div class="scard-top">
+      <div class="scard-icon" style="background:${s.bg}">${s.icon}</div>
+      <div>
+        <div class="scard-name">${s.name}</div>
+        <div style="font-family:var(--fm);font-size:var(--xs);color:#aaa;margin-top:.15rem">${cls}ª Classe · ${d.l.length} aulas · ${d.p.length} PDFs</div>
+      </div>
+    </div>
+    <div class="scard-body">
+      <p class="scard-desc">${s.desc}</p>
+      <div class="scard-foot">
+        <span class="badge" style="background:${s.bg};color:${s.c};border:1.5px solid ${s.c}">${s.badge}</span>
+        <span class="arr">→</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  ABRIR DISCIPLINA
+// ═══════════════════════════════════════════════
+function openSub(id,cls,cycle){
+  const list = cycle==='c1' ? C1_SUBS : C2_SUBS;
+  const s=list.find(x=>x.id===id);
+  if(!s)return;
+
+  const uid=id+'_'+cls;
+  cur={...s, uid, cls, cycle};
+
+  // breadcrumb
+  document.getElementById('hBread').style.display='flex';
+  document.getElementById('hNav').style.display='none';
+  document.getElementById('hBreadCycle').textContent = cycle==='c1'?'1º Ciclo':'2º Ciclo';
+  document.getElementById('hBreadDisc').textContent = s.name+' ('+cls+'ª)';
+
+  const d=gd(uid);
+  const cycleColor = cycle==='c1'?'var(--cobalt)':'var(--sage)';
+  const cycleLabel = cycle==='c1'?'1º Ciclo — '+cls+'ª Classe':'2º Ciclo — '+cls+'ª Classe';
+
+  document.getElementById('dHero').innerHTML=`
+    <div class="page">
+      <div class="dicon" style="background:${s.bg}">${s.icon}</div>
+      <div class="dtitle">${s.name}</div>
+      <div class="dcycle"><span style="background:${s.bg};color:${s.c};border:1px solid ${s.c};padding:.2rem .75rem;border-radius:var(--rpill)">${cycleLabel}</span></div>
+      <div class="ddesc">${s.desc}</div>
+      <div class="dstats">
+        <div class="dstat"><span class="dsn" id="stA" style="color:${s.c}">${d.l.length}</span><span class="dsl">Aulas</span></div>
+        <div class="dstat"><span class="dsn" id="stP" style="color:${s.c}">${d.p.length}</span><span class="dsl">PDFs</span></div>
+      </div>
+    </div>`;
+
+  // Simulador: Física 12ª (átomos) + Física 7ª e 8ª (Newton/MRU)
+  const isPhysics12 = (id==='fis2' && cls==='12');
+  const isPhysics78 = (id==='fis' && (cls==='7' || cls==='8'));
+  const isPhysics = isPhysics12 || isPhysics78;
+  document.getElementById('tabSim').style.display = isPhysics ? '' : 'none';
+  // marca qual tipo de simulador está activo
+  document.getElementById('tc-sim').dataset.simType = isPhysics78 ? 'newton' : 'atom';
+
+  // reset tabs
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab')[0].classList.add('on');
+  document.getElementById('tc-aulas').classList.add('on');
+
+  document.getElementById('backBtn').style.display='flex';
+  renderLessons();
+  showView('vDisc');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════
+//  TABS DA DISCIPLINA
+// ═══════════════════════════════════════════════
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('tc-'+name).classList.add('on');
+  if(name==='aulas')renderLessons();
+  if(name==='pdfs')renderPDFs();
+  if(name==='gerir')renderManage();
+  if(name==='sim'){
+    const simType=document.getElementById('tc-sim').dataset.simType;
+    if(simType==='newton') setTimeout(initSimNewton,60);
+    else setTimeout(initSim,60);
+  }
+}
+
+function gotoGerir(){
+  const tabs=document.querySelectorAll('.tab');
+  const gBtn=tabs[tabs.length-1];
+  switchTab('gerir',gBtn);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER AULAS
+// ═══════════════════════════════════════════════
+function renderLessons(){
+  if(!cur)return;
+  const d=gd(cur.uid);
+  document.getElementById('aulasTitle').textContent='Aulas — '+cur.name+' ('+cur.cls+'ª Classe)';
+  const el=document.getElementById('lList');
+  const em=document.getElementById('lEmpty');
+  if(!d.l.length){el.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  el.innerHTML=d.l.map((l,i)=>{
+    const yt=getYT(l.v||'');
+    const vb=yt?`<div style="margin-bottom:1rem"><div style="font-family:var(--fm);font-size:var(--xs);letter-spacing:.1em;text-transform:uppercase;color:#aaa;margin-bottom:.6rem">🎬 Vídeo da Aula</div><div class="vwrap"><iframe src="https://www.youtube.com/embed/${yt}" allowfullscreen loading="lazy"></iframe></div></div>`:'';
+    return`<div class="litem">
+      <div class="lhdr" onclick="togL(this)">
+        <span class="lnum">A${String(i+1).padStart(2,'0')}</span>
+        <div style="flex:1">
+          <div class="lname">${l.t}</div>
+          <div class="lmeta">${l.d?'<span>⏱ '+l.d+' min</span>':''}${yt?'<span>🎬 Vídeo</span>':''}</div>
+        </div>
+        <span class="ltog">▼</span>
+        <button onclick="event.stopPropagation();delL(${i})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:1rem;margin-left:.5rem">🗑</button>
+      </div>
+      <div class="lbody">${l.c?'<p class="ldesc">'+l.c+'</p>':''}${vb}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER PDFs
+// ═══════════════════════════════════════════════
+function renderPDFs(){
+  if(!cur)return;
+  const d=gd(cur.uid);
+  document.getElementById('pdfsTitle').textContent='PDFs — '+cur.name+' ('+cur.cls+'ª Classe)';
+  const el=document.getElementById('pGrid');
+  const em=document.getElementById('pEmpty');
+  if(!d.p.length){el.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  const ic={Resumo:'📋',Exercícios:'✏️',Exame:'📝',Livro:'📚',Outro:'📎'};
+  el.innerHTML=d.p.map((p,i)=>`
+    <div class="pcard">
+      <div class="picon">${ic[p.tp]||'📎'}</div>
+      <div class="pname">${p.n}</div>
+      <div class="pinfo">${p.tp}${p.sz?' · '+p.sz:''}</div>
+      <div class="pacts">
+        ${p.lk?'<a class="btn-dl" href="'+p.lk+'" target="_blank" rel="noopener">⬇ Download</a>':'<span style="font-size:var(--xs);color:#aaa">Sem link</span>'}
+        <button class="btn-o" onclick="delP(${i})">🗑 Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER GERIR
+// ═══════════════════════════════════════════════
+function renderManage(){
+  if(!cur)return;
+  const d=gd(cur.uid);
+  const el=document.getElementById('mList');
+  if(!d.l.length&&!d.p.length){
+    el.innerHTML='<p style="font-size:var(--sm);color:#aaa;text-align:center;padding:2rem">Nenhum conteúdo adicionado ainda.</p>';
+    return;
+  }
+  el.innerHTML=`<p style="font-family:var(--fm);font-size:var(--xs);color:#888;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem">${d.l.length} aulas · ${d.p.length} PDFs</p>`+
+    d.l.map((l,i)=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--cream)"><span>📚</span><span style="flex:1;font-size:var(--sm);font-weight:500">${l.t}</span><span style="font-family:var(--fm);font-size:var(--xs);color:#aaa">Aula</span><button onclick="delL(${i})" style="background:none;border:none;cursor:pointer;color:#ccc">🗑</button></div>`).join('')+
+    d.p.map((p,i)=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--cream)"><span>📄</span><span style="flex:1;font-size:var(--sm);font-weight:500">${p.n}</span><span style="font-family:var(--fm);font-size:var(--xs);color:#aaa">${p.tp}</span><button onclick="delP(${i})" style="background:none;border:none;cursor:pointer;color:#ccc">🗑</button></div>`).join('');
+}
+
+function updStats(){
+  const d=gd(cur.uid);
+  const a=document.getElementById('stA');
+  const p=document.getElementById('stP');
+  if(a)a.textContent=d.l.length;
+  if(p)p.textContent=d.p.length;
+}
+
+// ═══════════════════════════════════════════════
+//  ADD / DELETE
+// ═══════════════════════════════════════════════
+function addLesson(){
+  const t=document.getElementById('faTitulo').value.trim();
+  if(!t){toast('⚠️','Escreva o título da aula!');return;}
+  gd(cur.uid).l.push({t,d:document.getElementById('faDur').value.trim(),c:document.getElementById('faDesc').value.trim(),v:document.getElementById('faVideo').value.trim()});
+  save();clearLF();renderLessons();renderManage();updStats();renderHome();
+  toast('✓','Aula adicionada com sucesso!');
+}
+function addPDF(){
+  const n=document.getElementById('fpNome').value.trim();
+  if(!n){toast('⚠️','Escreva o nome do ficheiro!');return;}
+  gd(cur.uid).p.push({n,tp:document.getElementById('fpTipo').value,lk:document.getElementById('fpLink').value.trim(),sz:document.getElementById('fpSize').value.trim()});
+  save();clearPF();renderPDFs();renderManage();updStats();renderHome();
+  toast('✓','PDF adicionado com sucesso!');
+}
+function delL(i){if(!confirm('Eliminar esta aula?'))return;gd(cur.uid).l.splice(i,1);save();renderLessons();renderManage();updStats();renderHome();toast('🗑','Aula eliminada.');}
+function delP(i){if(!confirm('Eliminar este PDF?'))return;gd(cur.uid).p.splice(i,1);save();renderPDFs();renderManage();updStats();renderHome();toast('🗑','PDF eliminado.');}
+function clearLF(){['faTitulo','faDur','faDesc','faVideo'].forEach(id=>document.getElementById(id).value='');}
+function clearPF(){['fpNome','fpLink','fpSize'].forEach(id=>document.getElementById(id).value='');document.getElementById('fpTipo').selectedIndex=0;}
+
+// ═══════════════════════════════════════════════
+//  NAVEGAÇÃO
+// ═══════════════════════════════════════════════
+function showCycle(id,btn){
+  curCycle=id;
+  document.querySelectorAll('.cpanel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  if(btn) btn.classList.add('on');
+  // sync header nav
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn && btn.classList.contains('nav-btn')) btn.classList.add('active');
+}
+
+function goBackCycle(){
+  goHome();
+  // restore correct cycle tab
+  const ct=document.getElementById(curCycle==='c1'?'ctab1':'ctab2');
+  showCycle(curCycle,ct);
+}
+
+function goHome(){
+  showView('vHome');
+  document.getElementById('hBread').style.display='none';
+  document.getElementById('hNav').style.display='flex';
+  document.getElementById('backBtn').style.display='none';
+  cur=null;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goBackBtn(){
+  // go back to the correct cycle
+  const cycle = cur ? cur.cycle : curCycle;
+  goHome();
+  const ct = document.getElementById(cycle==='c1'?'ctab1':'ctab2');
+  showCycle(cycle, ct);
+  // scroll to the class block
+  if(cur){
+    const cls = cur.cls;
+    setTimeout(()=>{
+      const g = document.getElementById('g-'+cls);
+      if(g) g.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 100);
+  }
+}
+
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function togL(h){
+  const b=h.nextElementSibling;
+  const a=h.querySelector('.ltog');
+  b.classList.toggle('open');
+  a.classList.toggle('open');
+}
+
+function getYT(u){
+  if(!u)return'';
+  const m=u.match(/(?:youtu\.be\/|v=|embed\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:'';
+}
+
+let _tt;
+function toast(icon,msg){
+  const t=document.getElementById('toast');
+  document.getElementById('tIcon').textContent=icon;
+  document.getElementById('tMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(_tt);
+  _tt=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ═══════════════════════════════════════════════
+//  SIMULADOR NEWTON — INIT (7ª e 8ª Classe)
+// ═══════════════════════════════════════════════
+let _newtonInited=false;
+let _mruaChart=null, _lei1Chart=null, _lei2Chart=null, _lei3Chart=null;
+let _mruaAnim=null, _lei1Anim=null, _lei2Anim=null, _lei3Anim=null;
+
+function initSimNewton(){
+  if(_newtonInited)return;
+  _newtonInited=true;
+  // Actualiza cabeçalho
+  document.getElementById('simHeaderIcon').textContent='🚗';
+  document.getElementById('simHeaderTitle').textContent='Simuladores — Mecânica & Leis de Newton';
+  document.getElementById('simHeaderSub').textContent='MRU · MRUa · 1ª · 2ª · 3ª Lei de Newton · Física 7ª e 8ª Classe';
+  document.getElementById('simNewtonPanel').style.display='';
+  document.getElementById('simAtomPanel').style.display='none';
+  // Mostra primeiro painel
+  showSimNewton('mrua', document.querySelector('.sim-nav-btn'));
+  // inicia estado do 2ª lei
+  lei2Update();
+  buildLei2Table();
+}
+
+function showSimNewton(key,btn){
+  document.querySelectorAll('.sn-panel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.sim-nav-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('sn-'+key).style.display='';
+  btn.classList.add('on');
+  if(key==='mrua' && !_mruaChart) initChartMRUA();
+  if(key==='lei1' && !_lei1Chart) initChartLei1();
+  if(key==='lei2' && !_lei2Chart) initChartLei2();
+  if(key==='lei3' && !_lei3Chart) initChartLei3();
+  // draw canvases
+  if(key==='mrua') drawCanvasMRUA(parseFloat(document.getElementById('mruaX0').value)||0, 0, 0);
+  if(key==='lei1') drawCanvasLei1(0.5);
+  if(key==='lei2') drawCanvasLei2(0);
+  if(key==='lei3') drawCanvasLei3();
+}
+
+// ─────────────── MRU / MRUa ───────────────
+function initChartMRUA(){
+  const ctx=document.getElementById('chartMRUA').getContext('2d');
+  _mruaChart=new Chart(ctx,{
+    type:'line',
+    data:{labels:[],datasets:[
+      {label:'x(t) — posição (m)',data:[],borderColor:'#1A4FBF',backgroundColor:'rgba(26,79,191,.08)',tension:.3,pointRadius:3},
+      {label:'v(t) — velocidade (m/s)',data:[],borderColor:'#E8842A',backgroundColor:'rgba(232,132,42,.08)',tension:.3,pointRadius:3,borderDash:[5,3]}
+    ]},
+    options:{responsive:true,animation:{duration:400},plugins:{legend:{position:'top'}},scales:{x:{title:{display:true,text:'Tempo (s)'}},y:{title:{display:true,text:'x (m) / v (m/s)'}}}}
+  });
+}
+
+function drawCanvasMRUA(x, xMax, progress){
+  const c=document.getElementById('canvasMRUA');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  // estrada
+  ctx.fillStyle='#dde3f0';ctx.fillRect(0,H*0.65,W,H*0.35);
+  ctx.fillStyle='#bbbfcc';ctx.fillRect(0,H*0.62,W,8);
+  // linhas tracejadas
+  ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.setLineDash([20,15]);
+  ctx.beginPath();ctx.moveTo(0,H*0.78);ctx.lineTo(W,H*0.78);ctx.stroke();
+  ctx.setLineDash([]);
+  // carro
+  const norm = xMax>0 ? Math.min(x/xMax,1) : 0;
+  const carX = 40 + norm*(W-120);
+  const carY = H*0.38;
+  // corpo carro
+  ctx.fillStyle='#1A4FBF';ctx.beginPath();
+  ctx.roundRect(carX,carY,80,30,6);ctx.fill();
+  // tecto
+  ctx.fillStyle='#0e316b';ctx.beginPath();
+  ctx.roundRect(carX+10,carY-18,60,20,4);ctx.fill();
+  // janelas
+  ctx.fillStyle='rgba(200,230,255,.7)';
+  ctx.fillRect(carX+14,carY-15,20,14);
+  ctx.fillRect(carX+42,carY-15,20,14);
+  // rodas
+  [carX+15,carX+55].forEach(wx=>{
+    ctx.fillStyle='#222';ctx.beginPath();ctx.arc(wx,carY+30,10,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#aaa';ctx.beginPath();ctx.arc(wx,carY+30,5,0,Math.PI*2);ctx.fill();
+  });
+  // seta velocidade
+  if(xMax>0){
+    ctx.strokeStyle='#E8842A';ctx.lineWidth=3;ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(carX+80,carY+10);ctx.lineTo(carX+80+40,carY+10);ctx.stroke();
+    ctx.fillStyle='#E8842A';ctx.beginPath();ctx.moveTo(carX+120,carY+10);ctx.lineTo(carX+110,carY+5);ctx.lineTo(carX+110,carY+15);ctx.fill();
+    ctx.fillStyle='#E8842A';ctx.font='bold 11px monospace';ctx.fillText('v →',carX+83,carY+7);
+  }
+  // label posição
+  ctx.fillStyle='#333';ctx.font='bold 13px sans-serif';
+  ctx.fillText('x = '+x.toFixed(1)+' m',10,18);
+}
+
+function calcMRUA(){
+  const tipo=document.getElementById('mruaTipo').value;
+  const x0=parseFloat(document.getElementById('mruaX0').value)||0;
+  const v0=parseFloat(document.getElementById('mruaV0').value)||0;
+  const a=tipo==='mru'?0:(parseFloat(document.getElementById('mruaA').value)||0);
+  const T=parseFloat(document.getElementById('mruaT').value)||6;
+  const steps=Math.round(T)+1;
+  const labels=[],xs=[],vs=[];
+  let rows='';
+  for(let i=0;i<=steps;i++){
+    const t=i;
+    const xt=x0+v0*t+0.5*a*t*t;
+    const vt=v0+a*t;
+    labels.push(t+'s');xs.push(+xt.toFixed(2));vs.push(+vt.toFixed(2));
+    const dx=i===0?'-':((xt-(x0+v0*(i-1)+0.5*a*(i-1)*(i-1))).toFixed(2)+' m');
+    rows+=`<tr><td>${t}</td><td>${xt.toFixed(2)}</td><td>${vt.toFixed(2)}</td><td>${dx}</td></tr>`;
+  }
+  if(_mruaChart){_mruaChart.data.labels=labels;_mruaChart.data.datasets[0].data=xs;_mruaChart.data.datasets[1].data=vs;_mruaChart.update();}
+  document.getElementById('mruaTBody').innerHTML=rows;
+  const xFinal=xs[xs.length-1];
+  const vFinal=vs[vs.length-1];
+  const dist=xFinal-x0;
+  document.getElementById('mruaResult').style.display='block';
+  document.getElementById('mruaRG').innerHTML=`
+    <div class="sim-ri"><div class="sim-rl">Tipo</div><div class="sim-rv" style="font-size:var(--md)">${tipo.toUpperCase()}</div></div>
+    <div class="sim-ri"><div class="sim-rl">x final</div><div class="sim-rv">${xFinal.toFixed(2)} m</div></div>
+    <div class="sim-ri"><div class="sim-rl">v final</div><div class="sim-rv">${vFinal.toFixed(2)} m/s</div></div>
+    <div class="sim-ri"><div class="sim-rl">Distância</div><div class="sim-rv">${dist.toFixed(2)} m</div></div>
+    <div class="sim-ri"><div class="sim-rl">Aceleração</div><div class="sim-rv">${a.toFixed(2)} m/s²</div></div>
+    <div class="sim-ri"><div class="sim-rl">Tempo</div><div class="sim-rv">${T} s</div></div>`;
+  // anima carro
+  if(_mruaAnim)cancelAnimationFrame(_mruaAnim);
+  let t0=null;
+  const dur=Math.min(T*600,6000);
+  function step(ts){
+    if(!t0)t0=ts;
+    const frac=Math.min((ts-t0)/dur,1);
+    const t=frac*T;
+    const xt=x0+v0*t+0.5*a*t*t;
+    drawCanvasMRUA(xt,xFinal,frac);
+    if(frac<1)_mruaAnim=requestAnimationFrame(step);
+  }
+  _mruaAnim=requestAnimationFrame(step);
+  toast('🚗','Simulação MRU'+(tipo==='mrua'?'a':'')+' calculada!');
+}
+
+function resetMRUA(){
+  document.getElementById('mruaResult').style.display='none';
+  document.getElementById('mruaTBody').innerHTML='';
+  const tipo=document.getElementById('mruaTipo').value;
+  document.getElementById('mruaARow').style.display=tipo==='mru'?'none':'';
+  if(_mruaChart){_mruaChart.data.labels=[];_mruaChart.data.datasets.forEach(d=>d.data=[]);_mruaChart.update();}
+  if(_mruaAnim)cancelAnimationFrame(_mruaAnim);
+  drawCanvasMRUA(parseFloat(document.getElementById('mruaX0').value)||0,0,0);
+}
+
+// ─────────────── 1ª LEI ───────────────
+function initChartLei1(){
+  const ctx=document.getElementById('chartLei1').getContext('2d');
+  _lei1Chart=new Chart(ctx,{
+    type:'bar',
+    data:{labels:['Peso (P)','Normal (N)','Resultante (FR)'],datasets:[{
+      label:'Força (N)',
+      data:[0,0,0],
+      backgroundColor:['rgba(26,79,191,.7)','rgba(60,122,90,.7)','rgba(201,64,96,.7)'],
+      borderColor:['#1A4FBF','#3C7A5A','#C94060'],
+      borderWidth:2,borderRadius:6
+    }]},
+    options:{responsive:true,animation:{duration:400},plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Força (N)'},beginAtZero:true}}}
+  });
+  lei1UpdateChart();
+}
+
+function lei1UpdateChart(){
+  const m=parseFloat(document.getElementById('lei1M').value)||5;
+  const P=m*10;
+  if(_lei1Chart){
+    _lei1Chart.data.datasets[0].data=[P,P,0];
+    _lei1Chart.update();
+  }
+}
+
+function drawCanvasLei1(frac){
+  const c=document.getElementById('canvasLei1');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  const est=document.getElementById('lei1Estado').value;
+  // chão
+  ctx.fillStyle='#e8e0f5';ctx.fillRect(0,H*0.75,W,H*0.25);
+  ctx.fillStyle='#c5b8e8';ctx.fillRect(0,H*0.72,W,6);
+  if(est==='repouso'){
+    // bloco parado
+    ctx.fillStyle='#6B3FA0';ctx.fillRect(W/2-30,H*0.45,60,60*0.72/0.75*0.3);
+    ctx.fillStyle='#8B5FC0';ctx.fillRect(W/2-28,H*0.47,56,24);
+    ctx.fillStyle='#EEE';ctx.font='bold 11px monospace';ctx.textAlign='center';
+    ctx.fillText('REPOUSO',W/2,H*0.62);
+    // setas N e P
+    ctx.strokeStyle='#3C7A5A';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(W/2,H*0.45);ctx.lineTo(W/2,H*0.15);ctx.stroke();
+    ctx.fillStyle='#3C7A5A';ctx.beginPath();ctx.moveTo(W/2,H*0.12);ctx.lineTo(W/2-6,H*0.18);ctx.lineTo(W/2+6,H*0.18);ctx.fill();
+    ctx.fillText('N',W/2+12,H*0.22);
+    ctx.strokeStyle='#1A4FBF';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(W/2,H*0.72);ctx.lineTo(W/2,H*0.98);ctx.stroke();
+    ctx.fillStyle='#1A4FBF';ctx.beginPath();ctx.moveTo(W/2,H*1.0);ctx.lineTo(W/2-6,H*0.95);ctx.lineTo(W/2+6,H*0.95);ctx.fill();
+    ctx.fillText('P',W/2+12,H*0.92);
+    ctx.textAlign='left';
+  } else {
+    // bloco a mover
+    const bx=50+frac*(W-160);
+    ctx.fillStyle='#6B3FA0';
+    ctx.beginPath();ctx.roundRect(bx,H*0.45,70,35,6);ctx.fill();
+    ctx.fillStyle='#EEE';ctx.font='bold 11px monospace';ctx.textAlign='center';
+    ctx.fillText('v=const',bx+35,H*0.67);
+    // seta movimento
+    ctx.strokeStyle='#E8842A';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(bx+70,H*0.62);ctx.lineTo(bx+110,H*0.62);ctx.stroke();
+    ctx.fillStyle='#E8842A';ctx.beginPath();ctx.moveTo(bx+112,H*0.62);ctx.lineTo(bx+102,H*0.57);ctx.lineTo(bx+102,H*0.67);ctx.fill();
+    ctx.textAlign='left';
+    // label FR=0
+    ctx.fillStyle='#C94060';ctx.font='bold 13px monospace';
+    ctx.fillText('FR = 0 N',W-120,25);
+  }
+}
+
+function animLei1(){
+  if(_lei1Anim)cancelAnimationFrame(_lei1Anim);
+  const est=document.getElementById('lei1Estado').value;
+  lei1UpdateChart();
+  if(est==='repouso'){drawCanvasLei1(0);toast('⚖️','Corpo em repouso — FR = 0 N');return;}
+  let t0=null;
+  function step(ts){
+    if(!t0)t0=ts;
+    const frac=(ts-t0)/4000%1;
+    drawCanvasLei1(frac);
+    _lei1Anim=requestAnimationFrame(step);
+  }
+  _lei1Anim=requestAnimationFrame(step);
+  toast('⚖️','MRU — Velocidade constante, FR = 0 N!');
+}
+
+function resetLei1(){
+  if(_lei1Anim)cancelAnimationFrame(_lei1Anim);
+  const est=document.getElementById('lei1Estado').value;
+  document.getElementById('lei1VRow').style.display=est==='repouso'?'none':'';
+  drawCanvasLei1(0);
+  lei1UpdateChart();
+}
+
+// ─────────────── 2ª LEI ───────────────
+function initChartLei2(){
+  const ctx=document.getElementById('chartLei2').getContext('2d');
+  _lei2Chart=new Chart(ctx,{
+    type:'line',
+    data:{labels:[],datasets:[
+      {label:'a(m) — F fixo (m/s²)',data:[],borderColor:'#3C7A5A',backgroundColor:'rgba(60,122,90,.08)',tension:.4,pointRadius:3},
+      {label:'a(F) — m fixo (m/s²)',data:[],borderColor:'#E8842A',backgroundColor:'rgba(232,132,42,.08)',tension:.4,pointRadius:3}
+    ]},
+    options:{responsive:true,animation:{duration:300},plugins:{legend:{position:'top'}},scales:{x:{title:{display:true,text:'m (kg) / F (N)'}},y:{title:{display:true,text:'Aceleração (m/s²)'},beginAtZero:true}}}
+  });
+  lei2RefreshChart();
+}
+
+function lei2Update(){
+  const m=parseFloat(document.getElementById('lei2M').value)||5;
+  const F=parseFloat(document.getElementById('lei2F').value)||20;
+  document.getElementById('lei2MVal').textContent=m+' kg';
+  document.getElementById('lei2FVal').textContent=F+' N';
+  const a=F/m;
+  document.getElementById('lei2AVal').textContent=a.toFixed(2)+' m/s²';
+  if(_lei2Chart)lei2RefreshChart();
+}
+
+function lei2RefreshChart(){
+  const F=parseFloat(document.getElementById('lei2F').value)||20;
+  const m=parseFloat(document.getElementById('lei2M').value)||5;
+  const ms=[1,2,3,5,8,10,15,20];
+  const Fs=[5,10,20,30,40,50,75,100];
+  const aM=ms.map(mi=>+(F/mi).toFixed(2));
+  const aF=Fs.map(fi=>+(fi/m).toFixed(2));
+  const labels=ms.map((mi,i)=>mi+' / '+Fs[i]);
+  if(_lei2Chart){
+    _lei2Chart.data.labels=labels;
+    _lei2Chart.data.datasets[0].data=aM;
+    _lei2Chart.data.datasets[1].data=aF;
+    _lei2Chart.update();
+  }
+}
+
+function buildLei2Table(){
+  const combos=[[10,2],[10,5],[20,2],[20,5],[50,5],[50,10],[100,5],[100,20]];
+  const rows=combos.map(([F,m])=>{
+    const a=F/m;
+    const obs=a>10?'Grande aceleração':a>5?'Moderada':a>2?'Pequena':'Muito pequena';
+    return`<tr><td>${F}</td><td>${m}</td><td>${a.toFixed(2)}</td><td>${obs}</td></tr>`;
+  }).join('');
+  const tb=document.getElementById('lei2TBody');if(tb)tb.innerHTML=rows;
+}
+
+function drawCanvasLei2(frac){
+  const c=document.getElementById('canvasLei2');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#e8f5ee';ctx.fillRect(0,H*0.75,W,H*0.25);
+  ctx.fillStyle='#b8d8c5';ctx.fillRect(0,H*0.72,W,6);
+  const F=parseFloat(document.getElementById('lei2F').value)||20;
+  const m=parseFloat(document.getElementById('lei2M').value)||5;
+  const a=F/m;
+  // bloco
+  const bw=40+m*3;
+  const bx=30+frac*(W-bw-60);
+  const by=H*0.45;
+  ctx.fillStyle='#3C7A5A';ctx.beginPath();ctx.roundRect(bx,by,bw,40,6);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 11px monospace';ctx.textAlign='center';
+  ctx.fillText(m+' kg',bx+bw/2,by+25);
+  // seta F
+  const arrLen=Math.min(F*1.5,120);
+  ctx.strokeStyle='#E8842A';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(bx-5,by+20);ctx.lineTo(bx-5-arrLen,by+20);ctx.stroke();
+  ctx.fillStyle='#E8842A';ctx.beginPath();ctx.moveTo(bx-3,by+20);ctx.lineTo(bx-13,by+15);ctx.lineTo(bx-13,by+25);ctx.fill();
+  ctx.font='bold 12px monospace';ctx.fillText('F='+F+'N',bx-5-arrLen/2,by+14);
+  // seta a
+  ctx.strokeStyle='#1A4FBF';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(bx+bw,by+20);ctx.lineTo(bx+bw+60,by+20);ctx.stroke();
+  ctx.fillStyle='#1A4FBF';ctx.beginPath();ctx.moveTo(bx+bw+62,by+20);ctx.lineTo(bx+bw+52,by+15);ctx.lineTo(bx+bw+52,by+25);ctx.fill();
+  ctx.font='bold 11px monospace';ctx.fillText('a='+a.toFixed(1),bx+bw+15,by+14);
+  ctx.textAlign='left';
+}
+
+function animLei2(){
+  if(_lei2Anim)cancelAnimationFrame(_lei2Anim);
+  let t0=null;
+  function step(ts){
+    if(!t0)t0=ts;
+    const frac=Math.min((ts-t0)/3000,1);
+    drawCanvasLei2(frac);
+    if(frac<1)_lei2Anim=requestAnimationFrame(step);
+  }
+  _lei2Anim=requestAnimationFrame(step);
+  lei2RefreshChart();
+  toast('🏋️','F = m·a calculado!');
+}
+
+function resetLei2(){
+  if(_lei2Anim)cancelAnimationFrame(_lei2Anim);
+  lei2Update();
+  drawCanvasLei2(0);
+}
+
+// ─────────────── 3ª LEI ───────────────
+function initChartLei3(){
+  const ctx=document.getElementById('chartLei3').getContext('2d');
+  _lei3Chart=new Chart(ctx,{
+    type:'bar',
+    data:{labels:['Acção (F₁₂)','Reacção (F₂₁)'],datasets:[
+      {label:'Força (N)',data:[0,0],
+       backgroundColor:['rgba(26,79,191,.7)','rgba(201,64,96,.7)'],
+       borderColor:['#1A4FBF','#C94060'],borderWidth:2,borderRadius:8}
+    ]},
+    options:{responsive:true,animation:{duration:400},plugins:{legend:{display:false}},
+      scales:{y:{title:{display:true,text:'Força (N)'},beginAtZero:true}}}
+  });
+}
+
+function drawCanvasLei3(){
+  const c=document.getElementById('canvasLei3');if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  const cena=document.getElementById('lei3Cena').value;
+  const F=parseFloat(document.getElementById('lei3F').value)||15;
+  const mA=parseFloat(document.getElementById('lei3MA').value)||5;
+  const mB=parseFloat(document.getElementById('lei3MB').value)||3;
+  ctx.fillStyle='#fff0f3';ctx.fillRect(0,H*0.72,W,H*0.28);
+  ctx.fillStyle='#f5c0cc';ctx.fillRect(0,H*0.70,W,5);
+  const midX=W/2;
+  // Corpo A
+  const wA=Math.min(40+mA*4,80);
+  ctx.fillStyle='#1A4FBF';ctx.beginPath();ctx.roundRect(midX-wA-10,H*0.38,wA,50,6);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 12px monospace';ctx.textAlign='center';
+  ctx.fillText('A · '+mA+'kg',midX-wA/2-10,H*0.67);
+  // Corpo B
+  const wB=Math.min(40+mB*4,80);
+  ctx.fillStyle='#C94060';ctx.beginPath();ctx.roundRect(midX+10,H*0.38,wB,50,6);ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.fillText('B · '+mB+'kg',midX+wB/2+10,H*0.67);
+  // Setas acção-reacção
+  const arrF=Math.min(F*1.8,100);
+  // Acção: A empurra B (→)
+  ctx.strokeStyle='#1A4FBF';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(midX-10,H*0.5);ctx.lineTo(midX+10+wB+20,H*0.5);ctx.stroke();
+  ctx.fillStyle='#1A4FBF';ctx.beginPath();ctx.moveTo(midX+10+wB+22,H*0.5);ctx.lineTo(midX+10+wB+10,H*0.45);ctx.lineTo(midX+10+wB+10,H*0.55);ctx.fill();
+  ctx.font='bold 10px monospace';ctx.fillStyle='#1A4FBF';
+  ctx.fillText('F₁₂='+F+'N →',midX+10,H*0.42);
+  // Reacção: B empurra A (←)
+  ctx.strokeStyle='#C94060';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(midX+12,H*0.6);ctx.lineTo(midX-wA-30,H*0.6);ctx.stroke();
+  ctx.fillStyle='#C94060';ctx.beginPath();ctx.moveTo(midX-wA-32,H*0.6);ctx.lineTo(midX-wA-22,H*0.55);ctx.lineTo(midX-wA-22,H*0.65);ctx.fill();
+  ctx.fillStyle='#C94060';
+  ctx.fillText('← F₂₁='+F+'N',midX-wA-10,H*0.55);
+  ctx.textAlign='left';
+}
+
+function calcLei3(){
+  const F=parseFloat(document.getElementById('lei3F').value)||15;
+  const mA=parseFloat(document.getElementById('lei3MA').value)||5;
+  const mB=parseFloat(document.getElementById('lei3MB').value)||3;
+  const aA=F/mA, aB=F/mB;
+  if(_lei3Chart){
+    _lei3Chart.data.datasets[0].data=[F,F];
+    _lei3Chart.update();
+  }
+  document.getElementById('lei3Result').style.display='block';
+  document.getElementById('lei3RG').innerHTML=`
+    <div style="font-family:var(--fm);font-size:var(--xs);letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:.75rem">Resultados</div>
+    <div class="sim-rg">
+      <div class="sim-ri"><div class="sim-rl">Acção F₁₂</div><div class="sim-rv">${F} N →</div><div class="sim-rs">Corpo A empurra B</div></div>
+      <div class="sim-ri"><div class="sim-rl">Reacção F₂₁</div><div class="sim-rv">${F} N ←</div><div class="sim-rs">Corpo B empurra A</div></div>
+      <div class="sim-ri"><div class="sim-rl">aₐ (aceleração A)</div><div class="sim-rv">${aA.toFixed(2)} m/s²</div><div class="sim-rs">a=F/mA</div></div>
+      <div class="sim-ri"><div class="sim-rl">aᵦ (aceleração B)</div><div class="sim-rv">${aB.toFixed(2)} m/s²</div><div class="sim-rs">a=F/mB</div></div>
+      <div class="sim-ri"><div class="sim-rl">|F₁₂| = |F₂₁|</div><div class="sim-rv">✓ Igual</div><div class="sim-rs">3ª Lei confirmada</div></div>
+    </div>`;
+  drawCanvasLei3();
+  toast('🤝','3ª Lei de Newton verificada!');
+}
+
+function resetLei3(){
+  document.getElementById('lei3Result').style.display='none';
+  if(_lei3Chart){_lei3Chart.data.datasets[0].data=[0,0];_lei3Chart.update();}
+  drawCanvasLei3();
+}
+
+// ═══════════════════════════════════════════════
+//  SIMULADOR — FÍSICA (NÍVEIS DE ENERGIA) — 12ª
+// ═══════════════════════════════════════════════
+const RH=13.6, HC=1239.8;
+function En(n){return -RH/(n*n);}
+function dE(ni,nf){return Math.abs(En(nf)-En(ni));}
+function wl(ni,nf){return HC/dE(ni,nf);}
+function region(w){if(w<380)return'Ultravioleta';if(w<750)return'Visível';return'Infravermelho';}
+function seriesN(nf){return['','Lyman','Balmer','Paschen','Brackett','Pfund'][nf]||'Humphreys';}
+function sColor(w){
+  if(w<380)return'#7B2FBE';if(w<450)return'#3B0FFF';if(w<495)return'#0095FF';
+  if(w<570)return'#00C853';if(w<590)return'#FFD600';if(w<620)return'#FF6D00';
+  if(w<750)return'#D50000';return'#795548';
+}
+
+let simCI=null;
+
+function initSim(){
+  // Actualiza cabeçalho para átomo
+  document.getElementById('simHeaderIcon').textContent='⚛️';
+  document.getElementById('simHeaderTitle').textContent='Simulador — Níveis de Energia';
+  document.getElementById('simHeaderSub').textContent='Modelação Computacional · Átomo de Hidrogénio · Física 12ª Classe';
+  document.getElementById('simNewtonPanel').style.display='none';
+  document.getElementById('simAtomPanel').style.display='';
+  if(simCI)return;
+  const cv=document.getElementById('simChart');
+  if(!cv)return;
+  simCI=new Chart(cv.getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:['n=1','n=2','n=3','n=4','n=5','n=6'],
+      datasets:[{
+        label:'Energia (eV)',
+        data:[1,2,3,4,5,6].map(n=>En(n)),
+        backgroundColor:[1,2,3,4,5,6].map(()=>'rgba(26,79,191,0.65)'),
+        borderColor:[1,2,3,4,5,6].map(()=>'rgba(26,79,191,1)'),
+        borderWidth:1.5,borderRadius:4
+      }]
+    },
+    options:{
+      responsive:true,animation:{duration:500},
+      scales:{
+        y:{title:{display:true,text:'Energia (eV)'},grid:{color:'rgba(0,0,0,.05)'}},
+        x:{title:{display:true,text:'Nível Quântico (n)'},grid:{display:false}}
+      },
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(3)+' eV'}}}
+    }
+  });
+  buildSimTable();
+}
+
+function simCalc(){
+  const ni=parseInt(document.getElementById('simNi').value);
+  const nf=parseInt(document.getElementById('simNf').value);
+  if(ni<=nf){toast('⚠️','O nível inicial deve ser MAIOR que o final!');return;}
+  const energy=dE(ni,nf),lambda=wl(ni,nf),reg=region(lambda),ser=seriesN(nf),col=sColor(lambda);
+  if(simCI){
+    simCI.data.datasets[0].backgroundColor=[1,2,3,4,5,6].map(n=>(n===ni||n===nf)?col:'rgba(200,200,200,0.35)');
+    simCI.data.datasets[0].borderColor=[1,2,3,4,5,6].map(n=>(n===ni||n===nf)?col:'rgba(180,180,180,0.5)');
+    simCI.update('active');
+  }
+  const res=document.getElementById('simResult');
+  res.style.display='block';
+  document.getElementById('simRG').innerHTML=`
+    <div class="sim-ri"><div class="sim-rl">Transição</div><div class="sim-rv">n${ni}→n${nf}</div><div class="sim-rs">Série ${ser}</div></div>
+    <div class="sim-ri"><div class="sim-rl">Energia</div><div class="sim-rv">${energy.toFixed(3)} eV</div><div class="sim-rs">${(energy*1.6e-19).toExponential(2)} J</div></div>
+    <div class="sim-ri"><div class="sim-rl">Comprimento de Onda</div><div class="sim-rv">${lambda.toFixed(1)} nm</div><div class="sim-rs" style="display:flex;align-items:center;justify-content:center;gap:.4rem"><span style="width:12px;height:12px;background:${col};border-radius:50%;display:inline-block"></span>${reg}</div></div>
+    <div class="sim-ri"><div class="sim-rl">E nível ${ni}</div><div class="sim-rv">${En(ni).toFixed(3)} eV</div></div>
+    <div class="sim-ri"><div class="sim-rl">E nível ${nf}</div><div class="sim-rv">${En(nf).toFixed(3)} eV</div></div>
+  `;
+  toast('⚛️','Transição calculada!');
+}
+
+function buildSimTable(){
+  const tb=document.getElementById('simTBody');
+  if(!tb)return;
+  let rows='';
+  [[1,[2,3,4,5,6]],[2,[3,4,5,6]],[3,[4,5,6]]].forEach(([nf,nis])=>{
+    nis.forEach(ni=>{
+      const e=dE(ni,nf),w=wl(ni,nf),col=sColor(w);
+      rows+=`<tr><td style="font-weight:600">${seriesN(nf)}</td><td style="font-family:var(--fm);font-size:var(--xs)">n=${ni}→n=${nf}</td><td>${e.toFixed(4)}</td><td><span style="display:inline-flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:${col};flex-shrink:0"></span>${w.toFixed(1)}</span></td><td style="font-size:var(--xs);color:#666">${region(w)}</td></tr>`;
+    });
+  });
+  tb.innerHTML=rows;
+}
+
+// ═══════════════════════════════════════════════
+//  AUTENTICAÇÃO — Firebase Firestore
+// ═══════════════════════════════════════════════
+let currentUser = null;
+
+// Aguarda Firebase ficar pronto antes de inicializar
+function authInit(){
+  const s = localStorage.getItem('ensinomoz_session');
+  if(s){try{currentUser=JSON.parse(s);showUserBadge();hideOverlay();}catch(e){showOverlay();}}
+  else showOverlay();
+}
+
+async function getUsers(){
+  if(window._fbReady) return await window._fb.fbGetUsers();
+  return JSON.parse(localStorage.getItem('emoz_users')||'[]');
+}
+async function saveUsers(list){
+  if(window._fbReady) return await window._fb.fbSaveUsers(list);
+  localStorage.setItem('emoz_users', JSON.stringify(list));
+}
+
+async function doRegister(){
+  const nome  = document.getElementById('rgNome').value.trim();
+  const email = document.getElementById('rgEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('rgPass').value;
+  const pass2 = document.getElementById('rgPass2').value;
+  const prof  = document.getElementById('rgProf').value;
+  const tel   = document.getElementById('rgTel').value.trim();
+  const msg   = document.getElementById('rgMsg');
+  const btn   = document.querySelector('#apRegister .auth-btn');
+  if(!nome||!email||!pass||!prof||!tel){showMsg(msg,'err','⚠️ Preencha todos os campos obrigatórios.');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showMsg(msg,'err','⚠️ Email inválido.');return;}
+  if(pass.length<6){showMsg(msg,'err','⚠️ A senha deve ter pelo menos 6 caracteres.');return;}
+  if(pass!==pass2){showMsg(msg,'err','⚠️ As senhas não coincidem.');return;}
+  btn.textContent='⏳ A criar…'; btn.disabled=true;
+  showMsg(msg,'ok','⏳ A verificar…');
+  try{
+    const users = await getUsers();
+    if(users.find(u=>u.email===email)){showMsg(msg,'err','⚠️ Email já cadastrado. Faça login.');btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;return;}
+    const user = {id:Date.now(),nome,email,pass:btoa(pass),prof,tel,createdAt:new Date().toISOString()};
+    users.push(user);
+    await saveUsers(users);
+    showMsg(msg,'ok','✅ Conta criada! A entrar…');
+    setTimeout(()=>{loginUser(user);btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;},800);
+  }catch(e){showMsg(msg,'err','❌ Erro de ligação. Verifique a internet.');btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;}
+}
+
+async function doLogin(){
+  const email = document.getElementById('liEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('liPass').value;
+  const msg   = document.getElementById('liMsg');
+  const btn   = document.querySelector('#apLogin .auth-btn');
+  if(!email||!pass){showMsg(msg,'err','⚠️ Preencha email e senha.');return;}
+  btn.textContent='⏳ A verificar…'; btn.disabled=true;
+  showMsg(msg,'ok','⏳ A verificar…');
+  try{
+    const users = await getUsers();
+    const user  = users.find(u=>u.email===email && u.pass===btoa(pass));
+    if(!user){showMsg(msg,'err','❌ Email ou senha incorrectos.');btn.textContent='→ Entrar na Plataforma';btn.disabled=false;return;}
+    showMsg(msg,'ok','✅ Bem-vindo(a)! A entrar…');
+    setTimeout(()=>{loginUser(user);btn.textContent='→ Entrar na Plataforma';btn.disabled=false;},600);
+  }catch(e){showMsg(msg,'err','❌ Erro de ligação. Verifique a internet.');btn.textContent='→ Entrar na Plataforma';btn.disabled=false;}
+}
+
+function loginUser(user){
+  currentUser = user;
+  localStorage.setItem('ensinomoz_session', JSON.stringify(user));
+  showUserBadge();
+  hideOverlay();
+}
+function doLogout(){
+  currentUser=null;
+  localStorage.removeItem('ensinomoz_session');
+  document.getElementById('userBadge').classList.remove('show');
+  showOverlay();
+}
+function showOverlay(){document.getElementById('authOverlay').classList.remove('hidden');}
+function hideOverlay(){document.getElementById('authOverlay').classList.add('hidden');}
+function authTab(t){
+  document.querySelectorAll('.auth-tab').forEach((b,i)=>b.classList.toggle('on',i===(t==='login'?0:1)));
+  document.getElementById('apLogin').classList.toggle('on',t==='login');
+  document.getElementById('apRegister').classList.toggle('on',t==='register');
+  document.getElementById('liMsg').className='auth-msg';
+  document.getElementById('rgMsg').className='auth-msg';
+}
+function showUserBadge(){
+  const b=document.getElementById('userBadge'); if(!currentUser||!b)return;
+  b.classList.add('show');
+  document.getElementById('userAvatar').textContent=currentUser.nome.charAt(0).toUpperCase();
+  document.getElementById('userName').textContent=currentUser.nome.split(' ')[0];
+}
+function showMsg(el,type,txt){el.className='auth-msg '+type;el.textContent=txt;}
+
+// ═══════════════════════════════════════════════
+//  DOCUMENTOS — Firebase Firestore
+// ═══════════════════════════════════════════════
+async function fbDocs(){
+  if(window._fbReady) return await window._fb.fbGetDocs();
+  try{return JSON.parse(localStorage.getItem('emoz-docs-'+(cur?cur.cls+'-'+cur.id:'global'))||'[]');}catch(e){return[];}
+}
+async function fbDocsSet(list){
+  if(window._fbReady) return await window._fb.fbSaveDocs(list);
+  localStorage.setItem('emoz-docs-'+(cur?cur.cls+'-'+cur.id:'global'), JSON.stringify(list));
+}
+
+async function renderDocs(){
+  const list=document.getElementById('docList');
+  const empty=document.getElementById('docEmpty');
+  const badge=document.getElementById('docsUserBadge');
+  if(!list)return;
+  if(currentUser&&badge)badge.textContent='👤 '+currentUser.nome.split(' ')[0]+' · '+currentUser.prof;
+  list.innerHTML='<div style="text-align:center;padding:2rem;color:#aaa;font-size:var(--sm)">⏳ A carregar…</div>';
+  empty.style.display='none';
+  const docs = await fbDocs();
+  if(!docs.length){list.innerHTML='';empty.style.display='';return;}
+  const tc={'📋':'#EAF0FC','✏️':'#FDF2E8','📝':'#FCE8EC','📚':'#E8F4EE','🖼️':'#F3EEFB','📎':'#FDF6E3'};
+  list.innerHTML=docs.map((d,i)=>`
+    <div class="doc-card">
+      <div class="doc-icon" style="background:${tc[d.tipo]||'#f5f5f5'}">${d.tipo}</div>
+      <div class="doc-meta">
+        <div class="doc-name">${d.nome}</div>
+        <div class="doc-by">Por <strong>${d.autor}</strong> · ${d.prof} · ${d.tel} · ${new Date(d.ts).toLocaleDateString('pt-MZ')}</div>
+        ${d.desc?`<div style="font-size:var(--xs);color:#666;margin-top:.2rem">${d.desc}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
+        <a class="doc-dl" href="${d.link}" target="_blank" rel="noopener">⬇ Baixar</a>
+        ${currentUser&&currentUser.id===d.uid?`<button onclick="docApagar(${i})" style="font-family:var(--fm);font-size:var(--xs);background:none;border:none;color:#ccc;cursor:pointer">🗑 apagar</button>`:''}
+      </div>
+    </div>`).join('');
+}
+async function docEnviar(){
+  if(!currentUser){toast('🔒','Faça login para enviar documentos.');return;}
+  const nome=document.getElementById('docNome').value.trim();
+  const link=document.getElementById('docLink').value.trim();
+  const tipo=document.getElementById('docTipo').value;
+  const desc=document.getElementById('docDesc').value.trim();
+  const msg=document.getElementById('docMsg');
+  if(!nome||!link){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='⚠️ Nome e link são obrigatórios.';return;}
+  if(!/^https?:\/\//.test(link)){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='⚠️ O link deve começar com https://';return;}
+  msg.style.cssText='display:block;background:#FDF6E3;color:#888';msg.textContent='⏳ A enviar…';
+  try{
+    const docs = await fbDocs();
+    docs.unshift({nome,link,tipo,desc,autor:currentUser.nome,prof:currentUser.prof,tel:currentUser.tel,uid:currentUser.id,ts:Date.now()});
+    await fbDocsSet(docs);
+    ['docNome','docLink','docDesc'].forEach(x=>document.getElementById(x).value='');
+    msg.style.cssText='display:block;background:#E8F4EE;color:#3c7a5a';msg.textContent='✅ Documento enviado com sucesso!';
+    setTimeout(()=>{msg.style.display='none';},2500);
+    toast('📁','Documento partilhado!');renderDocs();
+  }catch(e){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='❌ Erro ao enviar. Verifique a internet.';}
+}
+async function docApagar(i){
+  if(!currentUser||!confirm('Apagar este documento?'))return;
+  try{
+    const docs = await fbDocs();
+    if(docs[i]?.uid!==currentUser.id){toast('🔒','Só pode apagar os seus documentos.');return;}
+    docs.splice(i,1);
+    await fbDocsSet(docs);
+    toast('🗑','Documento apagado.');renderDocs();
+  }catch(e){toast('❌','Erro ao apagar.');}
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+renderHome();
+authInit();
+const _origSwitchTab=switchTab;
+switchTab=function(name,btn){_origSwitchTab(name,btn);if(name==='docs')renderDocs();};
+</script>
+</body>
+</html>
