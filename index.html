@@ -38,11 +38,11 @@ window.dispatchEvent(new Event('fb-ready'));
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0A1628; --paper:#F0F5FF; --cream:#D8E4F8; --mist:#B8CCF0;
-  --saffron:#1A4FBF; --cobalt:#1A4FBF; --sage:#1565C0;
-  --rose:#C94060; --gold:#C9A84C; --violet:#6B3FA0; --teal:#1A8A8A;
-  --saffron-t:#EAF0FC; --cobalt-t:#EAF0FC; --sage-t:#E3EEFF;
-  --rose-t:#FCE8EC; --gold-t:#FDF6E3; --violet-t:#F3EEFB; --teal-t:#E5F5F5;
+  --ink:#0A1628; --paper:#EEF4FF; --cream:#D8E6FF; --mist:#B0C8F0;
+  --saffron:#E8842A; --cobalt:#1A4FBF; --sage:#1A6FA0;
+  --rose:#C94060; --gold:#C9A84C; --violet:#2B5FD9; --teal:#1A8A8A;
+  --saffron-t:#FDF2E8; --cobalt-t:#DAEAFF; --sage-t:#D0EAFF;
+  --rose-t:#FCE8EC; --gold-t:#FDF6E3; --violet-t:#E0EDFF; --teal-t:#E5F5F5;
   --fd:'Fraunces',Georgia,serif; --fb:'DM Sans',sans-serif; --fm:'DM Mono',monospace;
   --xs:.64rem; --sm:.8rem; --base:1rem; --md:1.25rem; --lg:1.563rem;
   --xl:1.953rem; --2xl:2.441rem; --3xl:3.052rem;
@@ -54,11 +54,11 @@ window.dispatchEvent(new Event('fb-ready'));
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{font-family:var(--fb);background:var(--paper);color:var(--ink);font-size:var(--base);line-height:1.65;overflow-x:hidden;}
+body{font-family:var(--fb);background:linear-gradient(135deg,#EEF4FF 0%,#D8E8FF 100%);color:var(--ink);font-size:var(--base);line-height:1.65;overflow-x:hidden;min-height:100vh;}
 .page{max-width:1200px;margin:0 auto;padding:0 var(--s6);}
 
 /* HEADER */
-header{background:var(--ink);padding:var(--s4) 0;position:sticky;top:0;z-index:200;}
+header{background:#0A2A6E;padding:var(--s4) 0;position:sticky;top:0;z-index:200;}
 header .page{display:flex;align-items:center;gap:var(--s4);}
 .logo{font-family:var(--fd);font-size:var(--lg);font-weight:700;color:var(--paper);letter-spacing:-.02em;cursor:pointer;}
 .header-nav{display:flex;gap:var(--s3);margin-left:auto;flex-wrap:wrap;}
@@ -216,21 +216,21 @@ textarea.finput{min-height:80px;resize:vertical;}
 .sim-table tr:nth-child(even) td{background:#fafafa;}
 
 /* TOAST */
-.toast{position:fixed;bottom:var(--s6);right:var(--s6);background:var(--ink);color:var(--paper);font-family:var(--fb);font-size:var(--sm);font-weight:500;padding:var(--s4) var(--s5);border-radius:var(--r8);box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:9999;transform:translateY(120%);opacity:0;transition:transform .3s,opacity .3s;display:flex;align-items:center;gap:var(--s3);}
+.toast{position:fixed;bottom:var(--s6);right:var(--s6);background:#0A2A6E;color:var(--paper);font-family:var(--fb);font-size:var(--sm);font-weight:500;padding:var(--s4) var(--s5);border-radius:var(--r8);box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:9999;transform:translateY(120%);opacity:0;transition:transform .3s,opacity .3s;display:flex;align-items:center;gap:var(--s3);}
 .toast.show{transform:translateY(0);opacity:1;}
 
 hr.div{border:none;border-top:1.5px solid var(--cream);}
 
-footer{background:var(--ink);color:var(--paper);padding:var(--s7) 0;margin-top:var(--s8);}
+footer{background:#0A2A6E;color:var(--paper);padding:var(--s7) 0;margin-top:var(--s8);}
 footer .page{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--s4);}
 .fbrand{font-family:var(--fd);font-size:var(--xl);font-weight:700;letter-spacing:-.02em;}
 .finfo{font-family:var(--fm);font-size:var(--xs);color:#555;text-transform:uppercase;letter-spacing:.1em;text-align:right;line-height:2;}
 
 /* ══ AUTH ══ */
-#authOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(14,14,18,.93);backdrop-filter:blur(6px);}
+#authOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(10,26,110,.93);backdrop-filter:blur(6px);}
 #authOverlay.hidden{display:none;}
-.auth-box{background:var(--paper);border:2px solid var(--ink);border-radius:var(--r16);box-shadow:var(--sh2);width:100%;max-width:480px;overflow:hidden;}
-.auth-header{background:var(--ink);padding:1.5rem 2rem;text-align:center;}
+.auth-box{background:var(--paper);border:2px solid var(--cobalt);border-radius:var(--r16);box-shadow:var(--sh2);width:100%;max-width:480px;overflow:hidden;}
+.auth-header{background:#0A2A6E;padding:1.5rem 2rem;text-align:center;}
 .auth-logo{font-family:var(--fd);font-size:var(--xl);font-weight:700;color:var(--paper);letter-spacing:-.02em;}
 .auth-sub{font-family:var(--fm);font-size:var(--xs);color:#888;letter-spacing:.1em;text-transform:uppercase;margin-top:.3rem;}
 .auth-tabs{display:flex;border-bottom:2px solid var(--cream);}
@@ -250,9 +250,16 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
 .auth-msg.err{background:var(--rose-t);color:var(--rose);border:1px solid var(--rose);display:block;}
 #userBadge{display:none;align-items:center;gap:.6rem;font-family:var(--fm);font-size:var(--xs);color:#aaa;}
 #userBadge.show{display:flex;}
-.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--cobalt);color:#fff;font-family:var(--fd);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.7rem;}
-.logout-btn{font-family:var(--fm);font-size:var(--xs);color:#888;background:none;border:1px solid #444;padding:.2rem .6rem;border-radius:var(--rpill);cursor:pointer;}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--cobalt);color:#fff;font-family:var(--fd);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.75rem;overflow:hidden;border:2px solid rgba(255,255,255,.3);}
+.user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.logout-btn{font-family:var(--fm);font-size:var(--xs);color:#aaa;background:none;border:1px solid #4466aa;padding:.2rem .6rem;border-radius:var(--rpill);cursor:pointer;}
 .logout-btn:hover{color:#fff;border-color:#fff;}
+/* Password recovery */
+.forgot-link{display:block;text-align:right;font-family:var(--fm);font-size:var(--xs);color:var(--cobalt);cursor:pointer;margin-top:-.5rem;margin-bottom:.75rem;text-decoration:underline;}
+.forgot-link:hover{color:#0A2A6E;}
+/* Recover panel */
+#apRecover{display:none;}
+#apRecover.on{display:block;}
 .doc-card{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);margin-bottom:.75rem;transition:all .2s;}
 .doc-card:hover{border-color:var(--cobalt);}
 .doc-icon{width:40px;height:40px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
@@ -261,20 +268,15 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
 .doc-by{font-family:var(--fm);font-size:var(--xs);color:#aaa;margin-top:.15rem;}
 .doc-dl{font-family:var(--fb);font-size:var(--xs);font-weight:600;color:var(--cobalt);background:var(--cobalt-t);border:1px solid var(--cobalt);padding:.35rem .85rem;border-radius:var(--rpill);cursor:pointer;white-space:nowrap;text-decoration:none;}
 .doc-dl:hover{background:var(--cobalt);color:#fff;}
-/* FOLDERS */
-.folder-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;}
-.folder-chip{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--fm);font-size:var(--xs);padding:.3rem .75rem;border-radius:var(--rpill);border:1.5px solid var(--cream);background:#fff;cursor:pointer;transition:all .15s;}
-.folder-chip:hover,.folder-chip.on{background:var(--cobalt);color:#fff;border-color:var(--cobalt);}
-.folder-chip .fc-del{margin-left:.3rem;opacity:.5;font-size:.7rem;}
-.folder-chip:hover .fc-del{opacity:1;}
-.folder-add-btn{display:inline-flex;align-items:center;gap:.3rem;font-family:var(--fm);font-size:var(--xs);padding:.3rem .75rem;border-radius:var(--rpill);border:1.5px dashed var(--mist);background:transparent;cursor:pointer;color:#888;transition:all .15s;}
-.folder-add-btn:hover{border-color:var(--cobalt);color:var(--cobalt);}
-/* AVATAR PHOTO */
-.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--cobalt);color:#fff;font-family:var(--fd);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.75rem;overflow:hidden;border:2px solid rgba(255,255,255,.3);}
-.user-avatar img{width:100%;height:100%;object-fit:cover;}
-/* RECOVER */
-.auth-link{font-family:var(--fm);font-size:var(--xs);color:var(--cobalt);cursor:pointer;text-decoration:underline;}
-.auth-link:hover{opacity:.75;}
+/* FOLDER SYSTEM */
+.folder-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.5rem 0 1rem;border-bottom:1px solid var(--cream);margin-bottom:1rem;}
+.folder-chip{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--fm);font-size:var(--xs);background:var(--cobalt-t);color:var(--cobalt);border:1.5px solid var(--cobalt);padding:.3rem .75rem;border-radius:var(--rpill);cursor:pointer;transition:all .15s;}
+.folder-chip:hover,.folder-chip.active{background:var(--cobalt);color:#fff;}
+.folder-chip-del{background:none;border:none;color:inherit;cursor:pointer;font-size:.75rem;padding:0;margin-left:.2rem;opacity:.6;}
+.folder-chip-del:hover{opacity:1;}
+.btn-new-folder{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--fm);font-size:var(--xs);background:transparent;color:var(--cobalt);border:1.5px dashed var(--cobalt);padding:.3rem .75rem;border-radius:var(--rpill);cursor:pointer;transition:all .15s;}
+.btn-new-folder:hover{background:var(--cobalt-t);}
+@media(max-width:768px){
   .hero h1{font-size:var(--2xl);}
   .sgrid,.pgrid{grid-template-columns:1fr;}
   .fgrid,.sim-grid{grid-template-columns:1fr;}
@@ -296,28 +298,16 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
     <div class="auth-tabs">
       <button class="auth-tab on" onclick="authTab('login')">Entrar</button>
       <button class="auth-tab" onclick="authTab('register')">Criar Conta</button>
-      <button class="auth-tab" id="authTabRecover" onclick="authTab('recover')" style="display:none">🔑 Recuperar</button>
+      <button class="auth-tab" id="tabRecover" onclick="authTab('recover')" style="display:none">Recuperar</button>
     </div>
     <div class="auth-body">
       <div class="auth-panel on" id="apLogin">
         <div class="auth-field"><label>Email</label><input type="email" id="liEmail" placeholder="o.seu@email.com"></div>
         <div class="auth-field"><label>Senha</label><input type="password" id="liPass" placeholder="••••••••"></div>
+        <a class="forgot-link" onclick="authTab('recover')">Esqueceu a senha? Recuperar acesso →</a>
         <button class="auth-btn" onclick="doLogin()">→ Entrar na Plataforma</button>
         <div class="auth-msg" id="liMsg"></div>
-        <div style="text-align:center;margin-top:.75rem;font-family:var(--fm);font-size:var(--xs);color:#888">
-          <span class="auth-link" onclick="authTab('recover')">Esqueci a minha senha</span>
-        </div>
-        <div style="text-align:center;margin-top:.5rem;font-family:var(--fm);font-size:var(--xs);color:#888">Não tem conta? <a href="#" onclick="authTab('register');return false" style="color:var(--cobalt)">Cadastre-se gratuitamente</a></div>
-      </div>
-      <!-- RECUPERAR SENHA -->
-      <div class="auth-panel" id="apRecover">
-        <div style="text-align:center;font-size:1.5rem;margin-bottom:.5rem">🔑</div>
-        <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;text-align:center;margin-bottom:.25rem">Recuperar Senha</div>
-        <div style="font-family:var(--fm);font-size:var(--xs);color:#888;text-align:center;margin-bottom:1rem">Introduza o seu email — iremos mostrar a sua senha de segurança</div>
-        <div class="auth-field"><label>Email da conta</label><input type="email" id="recEmail" placeholder="o.seu@email.com"></div>
-        <button class="auth-btn" style="background:var(--cobalt)" onclick="doRecover()">🔍 Recuperar Senha</button>
-        <div class="auth-msg" id="recMsg"></div>
-        <div style="text-align:center;margin-top:1rem;font-family:var(--fm);font-size:var(--xs)"><span class="auth-link" onclick="authTab('login')">← Voltar ao Login</span></div>
+        <div style="text-align:center;margin-top:1rem;font-family:var(--fm);font-size:var(--xs);color:#888">Não tem conta? <a href="#" onclick="authTab('register');return false" style="color:var(--cobalt)">Cadastre-se gratuitamente</a></div>
       </div>
       <div class="auth-panel" id="apRegister">
         <div class="auth-field-row">
@@ -337,6 +327,20 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
         <button class="auth-btn" style="background:var(--sage)" onclick="doRegister()">✓ Criar Conta Gratuita</button>
         <div class="auth-msg" id="rgMsg"></div>
         <div style="text-align:center;margin-top:1rem;font-family:var(--fm);font-size:var(--xs);color:#888">Já tem conta? <a href="#" onclick="authTab('login');return false" style="color:var(--cobalt)">Entrar</a></div>
+      </div>
+      <!-- RECUPERAR SENHA -->
+      <div class="auth-panel" id="apRecover">
+        <div style="text-align:center;margin-bottom:1.25rem">
+          <div style="font-size:2rem;margin-bottom:.5rem">🔑</div>
+          <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;color:var(--ink)">Recuperar Senha</div>
+          <div style="font-family:var(--fm);font-size:var(--xs);color:#888;margin-top:.3rem">Introduza o seu email de registo</div>
+        </div>
+        <div class="auth-field"><label>Email registado</label><input type="email" id="recEmail" placeholder="o.seu@email.com"></div>
+        <div class="auth-field"><label>Nova Senha *</label><input type="password" id="recPass" placeholder="mín. 6 caracteres"></div>
+        <div class="auth-field"><label>Confirmar Nova Senha *</label><input type="password" id="recPass2" placeholder="repetir nova senha"></div>
+        <button class="auth-btn" style="background:var(--cobalt)" onclick="doRecover()">🔑 Redefinir Senha</button>
+        <div class="auth-msg" id="recMsg"></div>
+        <div style="text-align:center;margin-top:1rem;font-family:var(--fm);font-size:var(--xs);color:#888"><a href="#" onclick="authTab('login');return false" style="color:var(--cobalt)">← Voltar ao Login</a></div>
       </div>
     </div>
   </div>
@@ -359,7 +363,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
       <span id="hBreadDisc" style="color:#aaa"></span>
     </div>
     <div id="userBadge">
-      <div class="user-avatar" id="userAvatar">?</div>
+      <div class="user-avatar" id="userAvatar"><span id="userAvatarText">?</span></div>
       <span id="userName" style="color:#ccc;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
@@ -378,7 +382,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
         <div class="hero-stats">
           <div><span class="stn" style="color:var(--cobalt)">2</span><span class="stl">Ciclos</span></div>
           <div><span class="stn" style="color:var(--sage)">6</span><span class="stl">Classes</span></div>
-          <div><span class="stn" style="color:var(--saffron)">27</span><span class="stl">Disciplinas</span></div>
+          <div><span class="stn" style="color:var(--saffron)">29</span><span class="stl">Disciplinas</span></div>
         </div>
       </div>
     </div>
@@ -412,7 +416,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
             <span class="class-label-main">Sétima Classe</span>
             <span class="class-label-sub">1º Ciclo do Ensino Secundário</span>
           </div>
-          <span class="class-count">12 disciplinas</span>
+          <span class="class-count">13 disciplinas</span>
         </div>
         <div class="sgrid" id="g-7"></div>
       </div>
@@ -425,7 +429,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
             <span class="class-label-main">Oitava Classe</span>
             <span class="class-label-sub">1º Ciclo do Ensino Secundário</span>
           </div>
-          <span class="class-count">12 disciplinas</span>
+          <span class="class-count">13 disciplinas</span>
         </div>
         <div class="sgrid" id="g-8"></div>
       </div>
@@ -438,7 +442,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
             <span class="class-label-main">Nona Classe</span>
             <span class="class-label-sub">1º Ciclo do Ensino Secundário</span>
           </div>
-          <span class="class-count">12 disciplinas</span>
+          <span class="class-count">13 disciplinas</span>
         </div>
         <div class="sgrid" id="g-9"></div>
       </div>
@@ -458,7 +462,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
             <span class="class-label-main">Décima Classe</span>
             <span class="class-label-sub">2º Ciclo do Ensino Secundário</span>
           </div>
-          <span class="class-count">14 disciplinas</span>
+          <span class="class-count">15 disciplinas</span>
         </div>
         <div class="sgrid" id="g-10"></div>
       </div>
@@ -471,7 +475,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
             <span class="class-label-main">Décima Primeira Classe</span>
             <span class="class-label-sub">2º Ciclo do Ensino Secundário</span>
           </div>
-          <span class="class-count">14 disciplinas</span>
+          <span class="class-count">15 disciplinas</span>
         </div>
         <div class="sgrid" id="g-11"></div>
       </div>
@@ -484,7 +488,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
             <span class="class-label-main">Décima Segunda Classe</span>
             <span class="class-label-sub">2º Ciclo do Ensino Secundário</span>
           </div>
-          <span class="class-count">14 disciplinas</span>
+          <span class="class-count">15 disciplinas</span>
         </div>
         <div class="sgrid" id="g-12"></div>
       </div>
@@ -638,47 +642,26 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
   <!-- TAB DOCUMENTOS -->
   <div class="tc" id="tc-docs">
     <div class="page">
-      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1.5px solid var(--cream)">
-        <div style="width:56px;height:56px;background:var(--cobalt-t);border:1.5px solid var(--cobalt);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.6rem">📁</div>
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1.5px solid var(--cream)">
+        <div style="width:56px;height:56px;background:var(--gold-t);border:1.5px solid var(--gold);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.6rem">📁</div>
         <div><h2 style="font-family:var(--fd);font-size:var(--xl);font-weight:700;margin-bottom:.2rem">Documentos da Comunidade</h2><div style="font-family:var(--fm);font-size:var(--xs);color:#aaa">Partilha de Materiais</div></div>
-        <span id="docsUserBadge" style="margin-left:auto;font-family:var(--fm);font-size:var(--xs);background:var(--cobalt-t);color:var(--cobalt);border:1.5px solid var(--cobalt);padding:.25rem .75rem;border-radius:var(--rpill);white-space:nowrap"></span>
+        <span id="docsUserBadge" style="margin-left:auto;font-family:var(--fm);font-size:var(--xs);background:var(--sage-t);color:var(--sage);border:1.5px solid var(--sage);padding:.25rem .75rem;border-radius:var(--rpill);white-space:nowrap"></span>
       </div>
-
-      <!-- PASTAS -->
-      <div style="margin-bottom:1.5rem">
-        <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:.75rem">📂 Pastas</div>
-        <div class="folder-bar" id="folderBar">
-          <button class="folder-chip on" onclick="selectFolder('__all__',this)">📁 Todos</button>
-        </div>
-        <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap" id="folderActions">
-          <input class="finput" id="newFolderName" placeholder="Nome da nova pasta…" style="max-width:200px;font-size:var(--xs);padding:.35rem .6rem">
-          <button class="btn-p" onclick="addFolder()" style="padding:.35rem .85rem;font-size:var(--xs)">➕ Criar Pasta</button>
-          <button class="btn-q" id="renameFolderBtn" style="padding:.35rem .85rem;font-size:var(--xs);display:none" onclick="renameFolder()">✏️ Renomear</button>
-          <button class="btn-q" id="deleteFolderBtn" style="padding:.35rem .85rem;font-size:var(--xs);display:none;color:var(--rose)" onclick="deleteFolder()">🗑 Apagar Pasta</button>
-        </div>
-      </div>
-
-      <!-- ENVIAR -->
-      <div style="margin-bottom:2rem;background:#fff;border:1.5px solid var(--cream);border-radius:var(--r16);padding:1.5rem">
+      <div style="margin-bottom:2rem">
         <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:1rem">📤 Enviar Documento</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
           <div class="frow"><label class="flabel">Nome *</label><input class="finput" id="docNome" placeholder="Ex: Resumo Capítulo 4"></div>
           <div class="frow"><label class="flabel">Tipo</label><select class="finput" id="docTipo"><option value="📋">📋 Resumo</option><option value="✏️">✏️ Exercícios</option><option value="📝">📝 Exame</option><option value="📚">📚 Livro</option><option value="📎">📎 Outro</option></select></div>
         </div>
-        <div class="frow" style="margin-bottom:1rem"><label class="flabel">Pasta</label>
-          <select class="finput" id="docFolderSel"><option value="">📁 Sem pasta (Geral)</option></select>
-        </div>
         <div class="frow" style="margin-bottom:1rem"><label class="flabel">Link (Google Drive, Dropbox…) *</label><input class="finput" id="docLink" placeholder="https://drive.google.com/..."></div>
         <div class="frow" style="margin-bottom:1rem"><label class="flabel">Descrição (opcional)</label><input class="finput" id="docDesc" placeholder="Breve descrição…"></div>
-        <button class="btn-p" onclick="docEnviar()" style="background:var(--cobalt);border-color:var(--cobalt)">📤 Enviar Documento</button>
+        <button class="btn-p" onclick="docEnviar()" style="background:var(--sage);border-color:var(--sage)">📤 Enviar Documento</button>
         <div id="docMsg" style="display:none;margin-top:.75rem;font-family:var(--fm);font-size:var(--xs);padding:.6rem 1rem;border-radius:var(--r8)"></div>
       </div>
-
-      <!-- LISTA -->
       <div>
         <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:1rem">📥 Documentos Disponíveis</div>
         <div id="docList"></div>
-        <div id="docEmpty" style="display:none;text-align:center;padding:3rem;color:#aaa"><div style="font-size:3rem">📭</div><div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-top:1rem">Nenhum documento nesta pasta</div><div style="font-size:var(--sm);margin-top:.5rem">Seja o primeiro a partilhar!</div></div>
+        <div id="docEmpty" style="display:none;text-align:center;padding:3rem;color:#aaa"><div style="font-size:3rem">📭</div><div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-top:1rem">Nenhum documento ainda</div><div style="font-size:var(--sm);margin-top:.5rem">Seja o primeiro a partilhar!</div></div>
       </div>
     </div>
   </div>
@@ -686,6 +669,14 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
   <!-- TAB GERIR -->
   <div class="tc" id="tc-gerir">
     <div class="page">
+
+      <!-- PASTA MANAGEMENT -->
+      <div class="msec" style="border-color:var(--cobalt);background:var(--cobalt-t)">
+        <div class="mtitle" style="color:var(--cobalt)">📁 Gerir Pastas</div>
+        <p style="font-size:var(--sm);color:#666;margin-bottom:1rem">Crie pastas para organizar aulas e PDFs desta disciplina. As pastas aparecem em Aulas e PDFs como filtros.</p>
+        <div id="geirFolderBar"></div>
+        <button class="btn-new-folder" onclick="if(cur)newFolderUI(cur.uid)" style="margin-top:.5rem">+ Criar Nova Pasta</button>
+      </div>
       <div class="msec">
         <div class="mtitle">➕ Adicionar Nova Aula</div>
         <div class="fgrid">
@@ -698,6 +689,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
           <input class="finput" id="faVideo" placeholder="https://www.youtube.com/watch?v=...">
           <span class="fhint">Cole o link do YouTube — o vídeo fica incorporado automaticamente.</span>
         </div>
+        <div class="frow"><label class="flabel">📁 Pasta (opcional)</label><select class="finput" id="faFolder"><option value="">Sem pasta</option></select></div>
         <div class="facts">
           <button class="btn-p" onclick="addLesson()">✓ Guardar Aula</button>
           <button class="btn-q" onclick="clearLF()">Limpar</button>
@@ -724,6 +716,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
           <span class="fhint">Partilhe com acesso público e cole o link aqui.</span>
         </div>
         <div class="frow"><label class="flabel">Tamanho / Páginas (opcional)</label><input class="finput" id="fpSize" placeholder="Ex: 2.4 MB · 18 páginas"></div>
+        <div class="frow"><label class="flabel">📁 Pasta (opcional)</label><select class="finput" id="fpFolder"><option value="">Sem pasta</option></select></div>
         <div class="facts">
           <button class="btn-p" onclick="addPDF()">✓ Guardar PDF</button>
           <button class="btn-q" onclick="clearPF()">Limpar</button>
@@ -760,6 +753,7 @@ const C1_SUBS = [
   {id:'emp1',   icon:'💡', name:'Noções de Empreendedorismo', desc:'Fundamentos de negócios, identificação de oportunidades e iniciativa empreendedora no contexto moçambicano.',badge:'Obrigatória', bg:'var(--gold-t)',     c:'var(--gold)'},
   {id:'tic1',   icon:'💻', name:"TIC's",                      desc:'Tecnologias de Informação e Comunicação. Literacia digital, software básico e uso responsável da internet.', badge:'Obrigatória', bg:'var(--saffron-t)', c:'var(--saffron)'},
   {id:'edf1',   icon:'⚽', name:'Educação Física',            desc:'Desenvolvimento motor, desporto colectivo e individual, saúde e valores como respeito e trabalho em equipa.',badge:'Obrigatória', bg:'var(--teal-t)',     c:'var(--teal)'},
+  {id:'agro1',  icon:'🌾', name:'Agro-Pecuária',              desc:'Fundamentos de agricultura e criação de animais. Técnicas de cultivo, solos, pecuária básica e agro-negócio no contexto moçambicano.', badge:'Obrigatória', bg:'var(--sage-t)', c:'var(--sage)'},
 ];
 
 // Disciplinas do 2º ciclo (10ª, 11ª, 12ª classe)
@@ -778,6 +772,7 @@ const C2_SUBS = [
   {id:'emp2',   icon:'💡', name:'Noções de Empreendedorismo', desc:'Plano de negócios, gestão financeira básica, inovação e criação de empresas no contexto moçambicano.',      badge:'Obrigatória', bg:'var(--gold-t)',     c:'var(--gold)'},
   {id:'tic2',   icon:'💻', name:"TIC's",                      desc:'Programação básica, bases de dados, segurança digital e uso avançado de ferramentas tecnológicas.',         badge:'Obrigatória', bg:'var(--saffron-t)', c:'var(--saffron)'},
   {id:'edf2',   icon:'⚽', name:'Educação Física',            desc:'Desporto avançado, saúde, bem-estar e liderança. Preparação física e valores olímpicos.',                   badge:'Obrigatória', bg:'var(--teal-t)',     c:'var(--teal)'},
+  {id:'agro2',  icon:'🌾', name:'Agro-Pecuária',              desc:'Técnicas avançadas de produção agrícola, gestão de explorações pecuárias, agro-industrialização e desenvolvimento rural sustentável.', badge:'Obrigatória', bg:'var(--sage-t)', c:'var(--sage)'},
 ];
 
 // ═══════════════════════════════════════════════
@@ -840,6 +835,8 @@ function openSub(id,cls,cycle){
 
   const uid=id+'_'+cls;
   cur={...s, uid, cls, cycle};
+  activeAulaFolder='';
+  activePDFFolder='';
 
   // breadcrumb
   document.getElementById('hBread').style.display='flex';
@@ -889,8 +886,16 @@ function switchTab(name,btn){
   document.getElementById('tc-'+name).classList.add('on');
   if(name==='aulas')renderLessons();
   if(name==='pdfs')renderPDFs();
-  if(name==='gerir')renderManage();
+  if(name==='gerir'){renderManage();renderGeirFolders();}
   if(name==='sim')setTimeout(initSim,60);
+}
+function renderGeirFolders(){
+  if(!cur)return;
+  const el=document.getElementById('geirFolderBar');
+  if(!el)return;
+  const folders=getFolders(cur.uid);
+  if(!folders.length){el.innerHTML='<p style="font-size:var(--sm);color:#aaa">Nenhuma pasta ainda.</p>';return;}
+  el.innerHTML=folders.map((f,i)=>`<span class="folder-chip" style="margin:.2rem">📁 ${f} <button class="folder-chip-del" onclick="renameFolderUI('${cur.uid}','${f.replace(/'/g,"\\'")}',${i})">✏️</button><button class="folder-chip-del" onclick="deleteFolderUI('${cur.uid}','${f.replace(/'/g,"\\'")}')">×</button></span>`).join('');
 }
 
 function gotoGerir(){
@@ -908,9 +913,18 @@ function renderLessons(){
   document.getElementById('aulasTitle').textContent='Aulas — '+cur.name+' ('+cur.cls+'ª Classe)';
   const el=document.getElementById('lList');
   const em=document.getElementById('lEmpty');
-  if(!d.l.length){el.innerHTML='';em.style.display='block';return;}
+  // Folder bar
+  let fbarEl=document.getElementById('aulaFolderBar');
+  if(!fbarEl){
+    fbarEl=document.createElement('div');fbarEl.id='aulaFolderBar';
+    el.parentNode.insertBefore(fbarEl,el);
+  }
+  renderFolderBar(fbarEl,cur.uid,activeAulaFolder,function(f){activeAulaFolder=f;renderLessons();});
+  const filtered=activeAulaFolder?d.l.filter(l=>l.folder===activeAulaFolder):d.l;
+  if(!filtered.length){el.innerHTML='';em.style.display='block';return;}
   em.style.display='none';
-  el.innerHTML=d.l.map((l,i)=>{
+  el.innerHTML=filtered.map((l,i)=>{
+    const realIdx=d.l.indexOf(l);
     const yt=getYT(l.v||'');
     const vb=yt?`<div style="margin-bottom:1rem"><div style="font-family:var(--fm);font-size:var(--xs);letter-spacing:.1em;text-transform:uppercase;color:#aaa;margin-bottom:.6rem">🎬 Vídeo da Aula</div><div class="vwrap"><iframe src="https://www.youtube.com/embed/${yt}" allowfullscreen loading="lazy"></iframe></div></div>`:'';
     return`<div class="litem">
@@ -918,10 +932,10 @@ function renderLessons(){
         <span class="lnum">A${String(i+1).padStart(2,'0')}</span>
         <div style="flex:1">
           <div class="lname">${l.t}</div>
-          <div class="lmeta">${l.d?'<span>⏱ '+l.d+' min</span>':''}${yt?'<span>🎬 Vídeo</span>':''}</div>
+          <div class="lmeta">${l.d?'<span>⏱ '+l.d+' min</span>':''}${yt?'<span>🎬 Vídeo</span>':''}${l.folder?'<span>📁 '+l.folder+'</span>':''}</div>
         </div>
         <span class="ltog">▼</span>
-        <button onclick="event.stopPropagation();delL(${i})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:1rem;margin-left:.5rem">🗑</button>
+        <button onclick="event.stopPropagation();delL(${realIdx})" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:1rem;margin-left:.5rem">🗑</button>
       </div>
       <div class="lbody">${l.c?'<p class="ldesc">'+l.c+'</p>':''}${vb}</div>
     </div>`;
@@ -937,19 +951,28 @@ function renderPDFs(){
   document.getElementById('pdfsTitle').textContent='PDFs — '+cur.name+' ('+cur.cls+'ª Classe)';
   const el=document.getElementById('pGrid');
   const em=document.getElementById('pEmpty');
-  if(!d.p.length){el.innerHTML='';em.style.display='block';return;}
+  // Folder bar
+  let fbarEl=document.getElementById('pdfFolderBar');
+  if(!fbarEl){
+    fbarEl=document.createElement('div');fbarEl.id='pdfFolderBar';
+    el.parentNode.insertBefore(fbarEl,el);
+  }
+  renderFolderBar(fbarEl,cur.uid,activePDFFolder,function(f){activePDFFolder=f;renderPDFs();});
+  const filtered=activePDFFolder?d.p.filter(p=>p.folder===activePDFFolder):d.p;
+  if(!filtered.length){el.innerHTML='';em.style.display='block';return;}
   em.style.display='none';
   const ic={Resumo:'📋',Exercícios:'✏️',Exame:'📝',Livro:'📚',Outro:'📎'};
-  el.innerHTML=d.p.map((p,i)=>`
-    <div class="pcard">
+  el.innerHTML=filtered.map((p)=>{
+    const realIdx=d.p.indexOf(p);
+    return`<div class="pcard">
       <div class="picon">${ic[p.tp]||'📎'}</div>
       <div class="pname">${p.n}</div>
-      <div class="pinfo">${p.tp}${p.sz?' · '+p.sz:''}</div>
+      <div class="pinfo">${p.tp}${p.sz?' · '+p.sz:''}${p.folder?' · 📁 '+p.folder:''}</div>
       <div class="pacts">
         ${p.lk?'<a class="btn-dl" href="'+p.lk+'" target="_blank" rel="noopener">⬇ Download</a>':'<span style="font-size:var(--xs);color:#aaa">Sem link</span>'}
-        <button class="btn-o" onclick="delP(${i})">🗑 Eliminar</button>
+        <button class="btn-o" onclick="delP(${realIdx})">🗑 Eliminar</button>
       </div>
-    </div>`).join('');
+    </div>`;}).join('');
 }
 
 // ═══════════════════════════════════════════════
@@ -959,13 +982,21 @@ function renderManage(){
   if(!cur)return;
   const d=gd(cur.uid);
   const el=document.getElementById('mList');
+  // Populate folder selects
+  const folders=getFolders(cur.uid);
+  ['faFolder','fpFolder'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    const cur2=sel.value;
+    sel.innerHTML='<option value="">Sem pasta</option>'+folders.map(f=>`<option value="${f}" ${cur2===f?'selected':''}>${f}</option>`).join('');
+  });
   if(!d.l.length&&!d.p.length){
     el.innerHTML='<p style="font-size:var(--sm);color:#aaa;text-align:center;padding:2rem">Nenhum conteúdo adicionado ainda.</p>';
     return;
   }
   el.innerHTML=`<p style="font-family:var(--fm);font-size:var(--xs);color:#888;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem">${d.l.length} aulas · ${d.p.length} PDFs</p>`+
-    d.l.map((l,i)=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--cream)"><span>📚</span><span style="flex:1;font-size:var(--sm);font-weight:500">${l.t}</span><span style="font-family:var(--fm);font-size:var(--xs);color:#aaa">Aula</span><button onclick="delL(${i})" style="background:none;border:none;cursor:pointer;color:#ccc">🗑</button></div>`).join('')+
-    d.p.map((p,i)=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--cream)"><span>📄</span><span style="flex:1;font-size:var(--sm);font-weight:500">${p.n}</span><span style="font-family:var(--fm);font-size:var(--xs);color:#aaa">${p.tp}</span><button onclick="delP(${i})" style="background:none;border:none;cursor:pointer;color:#ccc">🗑</button></div>`).join('');
+    d.l.map((l,i)=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--cream)"><span>📚</span><span style="flex:1;font-size:var(--sm);font-weight:500">${l.t}</span><span style="font-family:var(--fm);font-size:var(--xs);color:#aaa">${l.folder?'📁 '+l.folder:''} Aula</span><button onclick="delL(${i})" style="background:none;border:none;cursor:pointer;color:#ccc">🗑</button></div>`).join('')+
+    d.p.map((p,i)=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--cream)"><span>📄</span><span style="flex:1;font-size:var(--sm);font-weight:500">${p.n}</span><span style="font-family:var(--fm);font-size:var(--xs);color:#aaa">${p.folder?'📁 '+p.folder+' · ':''} ${p.tp}</span><button onclick="delP(${i})" style="background:none;border:none;cursor:pointer;color:#ccc">🗑</button></div>`).join('');
 }
 
 function updStats(){
@@ -982,14 +1013,16 @@ function updStats(){
 function addLesson(){
   const t=document.getElementById('faTitulo').value.trim();
   if(!t){toast('⚠️','Escreva o título da aula!');return;}
-  gd(cur.uid).l.push({t,d:document.getElementById('faDur').value.trim(),c:document.getElementById('faDesc').value.trim(),v:document.getElementById('faVideo').value.trim()});
+  const folder=document.getElementById('faFolder').value;
+  gd(cur.uid).l.push({t,d:document.getElementById('faDur').value.trim(),c:document.getElementById('faDesc').value.trim(),v:document.getElementById('faVideo').value.trim(),folder:folder||''});
   save();clearLF();renderLessons();renderManage();updStats();renderHome();
   toast('✓','Aula adicionada com sucesso!');
 }
 function addPDF(){
   const n=document.getElementById('fpNome').value.trim();
   if(!n){toast('⚠️','Escreva o nome do ficheiro!');return;}
-  gd(cur.uid).p.push({n,tp:document.getElementById('fpTipo').value,lk:document.getElementById('fpLink').value.trim(),sz:document.getElementById('fpSize').value.trim()});
+  const folder=document.getElementById('fpFolder').value;
+  gd(cur.uid).p.push({n,tp:document.getElementById('fpTipo').value,lk:document.getElementById('fpLink').value.trim(),sz:document.getElementById('fpSize').value.trim(),folder:folder||''});
   save();clearPF();renderPDFs();renderManage();updStats();renderHome();
   toast('✓','PDF adicionado com sucesso!');
 }
@@ -1190,163 +1223,20 @@ async function authInit(){
 function showOverlay(){document.getElementById('authOverlay').classList.remove('hidden');}
 function hideOverlay(){document.getElementById('authOverlay').classList.add('hidden');}
 function authTab(t){
-  const panels={login:'apLogin',register:'apRegister',recover:'apRecover'};
-  const tabs=['login','register'];
-  document.querySelectorAll('.auth-tab').forEach((b,i)=>b.classList.toggle('on',tabs[i]===t));
-  // recover tab visibility
-  const rt=document.getElementById('authTabRecover');
-  if(rt) rt.style.display=t==='recover'?'':'none';
-  Object.entries(panels).forEach(([k,id])=>{
-    const el=document.getElementById(id);
-    if(el) el.classList.toggle('on',k===t);
+  const isRecover=(t==='recover');
+  const isLogin=(t==='login');
+  const isReg=(t==='register');
+  // tab highlights
+  document.querySelectorAll('.auth-tab').forEach((b,i)=>{
+    b.classList.toggle('on', (i===0&&isLogin)||(i===1&&isReg)||(i===2&&isRecover));
   });
-  ['liMsg','rgMsg','recMsg'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='auth-msg';});
-}
-
-// ─── RECUPERAÇÃO DE SENHA ───
-async function doRecover(){
-  const email=document.getElementById('recEmail').value.trim().toLowerCase();
-  const msg=document.getElementById('recMsg');
-  if(!email){showMsg(msg,'err','⚠️ Introduza o seu email.');return;}
-  showMsg(msg,'ok','⏳ A procurar conta…');
-  await fbReady();
-  if(!window._fb){showMsg(msg,'err','❌ Sem ligação ao Firebase.');return;}
-  try{
-    const {db,doc,getDoc}=window._fb;
-    const snap=await getDoc(doc(db,'users',email));
-    if(!snap.exists()){showMsg(msg,'err','❌ Nenhuma conta com este email.');return;}
-    const user=snap.data();
-    // Descodifica senha (base64)
-    let pass='';
-    try{pass=decodeURIComponent(escape(atob(user.pass)));}catch(e){pass='(não foi possível descodificar)';}
-    showMsg(msg,'ok',`✅ Conta encontrada!\n👤 ${user.nome}\n🔑 Senha: ${pass}\n\nGuarde e faça login.`);
-    msg.style.whiteSpace='pre-line';
-  }catch(e){showMsg(msg,'err','❌ Erro: '+e.message);}
-}
-
-// ─── AVATAR COM FOTO DO GOOGLE (Gravatar) ───
-function showUserBadge(){
-  const b=document.getElementById('userBadge');if(!currentUser||!b)return;
-  b.classList.add('show');
-  const av=document.getElementById('userAvatar');
-  const inicial=currentUser.nome.charAt(0).toUpperCase();
-  // Tenta carregar foto via Gravatar (usa hash MD5 do email)
-  const emailHash=md5(currentUser.email.trim().toLowerCase());
-  const gravatarUrl=`https://www.gravatar.com/avatar/${emailHash}?d=404&s=64`;
-  const img=new Image();
-  img.onload=()=>{av.innerHTML=`<img src="${gravatarUrl}" alt="${inicial}">`;};
-  img.onerror=()=>{av.innerHTML=inicial;av.style.fontSize='.75rem';};
-  img.src=gravatarUrl;
-  document.getElementById('userName').textContent=currentUser.nome.split(' ')[0];
-}
-
-// MD5 simples para Gravatar
-function md5(str){
-  function safeAdd(x,y){const lsw=(x&0xFFFF)+(y&0xFFFF);const msw=(x>>16)+(y>>16)+(lsw>>16);return(msw<<16)|(lsw&0xFFFF);}
-  function bitRotateLeft(num,cnt){return(num<<cnt)|(num>>>(32-cnt));}
-  function md5cmn(q,a,b,x,s,t){return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b);}
-  function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|((~b)&d),a,b,x,s,t);}
-  function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&(~d)),a,b,x,s,t);}
-  function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t);}
-  function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|(~d)),a,b,x,s,t);}
-  const bs=[];for(let i=0;i<str.length*2;i+=8)bs[i>>5]|=(str.charCodeAt(i/8)&0xFF)<<(i%32);
-  const l=str.length*8;bs[l>>5]|=0x80<<(l%32);bs[(((l+64)>>>9)<<4)+14]=l;
-  let a=1732584193,b=-271733879,c=-1732584194,d=271733878;
-  for(let i=0;i<bs.length;i+=16){
-    const oA=a,oB=b,oC=c,oD=d;
-    a=md5ff(a,b,c,d,bs[i],7,-680876936);d=md5ff(d,a,b,c,bs[i+1],12,-389564586);c=md5ff(c,d,a,b,bs[i+2],17,606105819);b=md5ff(b,c,d,a,bs[i+3],22,-1044525330);
-    a=md5ff(a,b,c,d,bs[i+4],7,-176418897);d=md5ff(d,a,b,c,bs[i+5],12,1200080426);c=md5ff(c,d,a,b,bs[i+6],17,-1473231341);b=md5ff(b,c,d,a,bs[i+7],22,-45705983);
-    a=md5ff(a,b,c,d,bs[i+8],7,1770035416);d=md5ff(d,a,b,c,bs[i+9],12,-1958414417);c=md5ff(c,d,a,b,bs[i+10],17,-42063);b=md5ff(b,c,d,a,bs[i+11],22,-1990404162);
-    a=md5ff(a,b,c,d,bs[i+12],7,1804603682);d=md5ff(d,a,b,c,bs[i+13],12,-40341101);c=md5ff(c,d,a,b,bs[i+14],17,-1502002290);b=md5ff(b,c,d,a,bs[i+15],22,1236535329);
-    a=md5gg(a,b,c,d,bs[i+1],5,-165796510);d=md5gg(d,a,b,c,bs[i+6],9,-1069501632);c=md5gg(c,d,a,b,bs[i+11],14,643717713);b=md5gg(b,c,d,a,bs[i],20,-373897302);
-    a=md5gg(a,b,c,d,bs[i+5],5,-701558691);d=md5gg(d,a,b,c,bs[i+10],9,38016083);c=md5gg(c,d,a,b,bs[i+15],14,-660478335);b=md5gg(b,c,d,a,bs[i+4],20,-405537848);
-    a=md5gg(a,b,c,d,bs[i+9],5,568446438);d=md5gg(d,a,b,c,bs[i+14],9,-1019803690);c=md5gg(c,d,a,b,bs[i+3],14,-187363961);b=md5gg(b,c,d,a,bs[i+8],20,1163531501);
-    a=md5gg(a,b,c,d,bs[i+13],5,-1444681467);d=md5gg(d,a,b,c,bs[i+2],9,-51403784);c=md5gg(c,d,a,b,bs[i+7],14,1735328473);b=md5gg(b,c,d,a,bs[i+12],20,-1926607734);
-    a=md5hh(a,b,c,d,bs[i+5],4,-378558);d=md5hh(d,a,b,c,bs[i+8],11,-2022574463);c=md5hh(c,d,a,b,bs[i+11],16,1839030562);b=md5hh(b,c,d,a,bs[i+14],23,-35309556);
-    a=md5hh(a,b,c,d,bs[i+1],4,-1530992060);d=md5hh(d,a,b,c,bs[i+4],11,1272893353);c=md5hh(c,d,a,b,bs[i+7],16,-155497632);b=md5hh(b,c,d,a,bs[i+10],23,-1094730640);
-    a=md5hh(a,b,c,d,bs[i+13],4,681279174);d=md5hh(d,a,b,c,bs[i],11,-358537222);c=md5hh(c,d,a,b,bs[i+3],16,-722521979);b=md5hh(b,c,d,a,bs[i+6],23,76029189);
-    a=md5hh(a,b,c,d,bs[i+9],4,-640364487);d=md5hh(d,a,b,c,bs[i+12],11,-421815835);c=md5hh(c,d,a,b,bs[i+15],16,530742520);b=md5hh(b,c,d,a,bs[i+2],23,-995338651);
-    a=md5ii(a,b,c,d,bs[i],6,-198630844);d=md5ii(d,a,b,c,bs[i+7],10,1126891415);c=md5ii(c,d,a,b,bs[i+14],15,-1416354905);b=md5ii(b,c,d,a,bs[i+5],21,-57434055);
-    a=md5ii(a,b,c,d,bs[i+12],6,1700485571);d=md5ii(d,a,b,c,bs[i+3],10,-1894986606);c=md5ii(c,d,a,b,bs[i+10],15,-1051523);b=md5ii(b,c,d,a,bs[i+1],21,-2054922799);
-    a=md5ii(a,b,c,d,bs[i+8],6,1873313359);d=md5ii(d,a,b,c,bs[i+15],10,-30611744);c=md5ii(c,d,a,b,bs[i+6],15,-1560198380);b=md5ii(b,c,d,a,bs[i+13],21,1309151649);
-    a=md5ii(a,b,c,d,bs[i+4],6,-145523070);d=md5ii(d,a,b,c,bs[i+11],10,-1120210379);c=md5ii(c,d,a,b,bs[i+2],15,718787259);b=md5ii(b,c,d,a,bs[i+9],21,-343485551);
-    a=safeAdd(a,oA);b=safeAdd(b,oB);c=safeAdd(c,oC);d=safeAdd(d,oD);
-  }
-  return [a,b,c,d].map(n=>('0000000'+(n<0?(n+4294967296).toString(16):n.toString(16))).slice(-8).replace(/(..)/g,(m,p1,o)=>p1[1]+p1[0])).join('').replace(/(..)/g,(m,p1,o)=>p1[1]+p1[0]);
-}
-
-// ═══════════════════════════════════════════════
-//  PASTAS DE DOCUMENTOS
-// ═══════════════════════════════════════════════
-let currentFolder='__all__';
-
-function foldersKey(){return 'emoz-folders-'+(cur?cur.cls+'-'+cur.id:'global');}
-function getFolders(){try{return JSON.parse(localStorage.getItem(foldersKey())||'[]');}catch(e){return[];}}
-function saveFolders(f){localStorage.setItem(foldersKey(),JSON.stringify(f));}
-
-function renderFolders(){
-  const bar=document.getElementById('folderBar');if(!bar)return;
-  const folders=getFolders();
-  const sel=document.getElementById('docFolderSel');
-  bar.innerHTML=`<button class="folder-chip${currentFolder==='__all__'?' on':''}" onclick="selectFolder('__all__',this)">📁 Todos</button>`;
-  if(sel)sel.innerHTML='<option value="">📁 Sem pasta (Geral)</option>';
-  folders.forEach(f=>{
-    bar.innerHTML+=`<button class="folder-chip${currentFolder===f?' on':''}" onclick="selectFolder('${f}',this)">📂 ${f}</button>`;
-    if(sel)sel.innerHTML+=`<option value="${f}">📂 ${f}</option>`;
-  });
-  // Botões de renomear/apagar
-  const rb=document.getElementById('renameFolderBtn');
-  const db=document.getElementById('deleteFolderBtn');
-  const show=currentFolder!=='__all__';
-  if(rb)rb.style.display=show?'':'none';
-  if(db)db.style.display=show?'':'none';
-}
-
-function selectFolder(name,btn){
-  currentFolder=name;
-  document.querySelectorAll('.folder-chip').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  const rb=document.getElementById('renameFolderBtn');
-  const db=document.getElementById('deleteFolderBtn');
-  if(rb)rb.style.display=name!=='__all__'?'':'none';
-  if(db)db.style.display=name!=='__all__'?'':'none';
-  renderDocs();
-}
-
-function addFolder(){
-  const inp=document.getElementById('newFolderName');
-  const name=inp.value.trim();
-  if(!name){toast('⚠️','Escreva o nome da pasta!');return;}
-  const folders=getFolders();
-  if(folders.includes(name)){toast('⚠️','Já existe uma pasta com esse nome!');return;}
-  folders.push(name);saveFolders(folders);
-  inp.value='';
-  currentFolder=name;
-  renderFolders();renderDocs();
-  toast('📂','Pasta criada: '+name);
-}
-
-function renameFolder(){
-  if(currentFolder==='__all__')return;
-  const novo=prompt('Novo nome para a pasta "'+currentFolder+'":',currentFolder);
-  if(!novo||novo===currentFolder)return;
-  const folders=getFolders();
-  const idx=folders.indexOf(currentFolder);
-  if(idx<0)return;
-  folders[idx]=novo;saveFolders(folders);
-  currentFolder=novo;
-  renderFolders();renderDocs();
-  toast('✏️','Pasta renomeada para: '+novo);
-}
-
-function deleteFolder(){
-  if(currentFolder==='__all__')return;
-  if(!confirm('Apagar a pasta "'+currentFolder+'"?\nOs documentos dentro desta pasta ficam em "Todos".'))return;
-  const folders=getFolders().filter(f=>f!==currentFolder);
-  saveFolders(folders);
-  currentFolder='__all__';
-  renderFolders();renderDocs();
-  toast('🗑','Pasta apagada.');
+  document.getElementById('tabRecover').style.display=isRecover?'':'none';
+  document.getElementById('apLogin').classList.toggle('on',isLogin);
+  document.getElementById('apRegister').classList.toggle('on',isReg);
+  document.getElementById('apRecover').classList.toggle('on',isRecover);
+  document.getElementById('liMsg').className='auth-msg';
+  document.getElementById('rgMsg').className='auth-msg';
+  if(document.getElementById('recMsg'))document.getElementById('recMsg').className='auth-msg';
 }
 
 async function doRegister(){
@@ -1411,10 +1301,120 @@ async function doLogin(){
 
 function loginUser(user){currentUser=user;localStorage.setItem('ensinomoz_session',JSON.stringify(user));showUserBadge();hideOverlay();}
 function doLogout(){currentUser=null;localStorage.removeItem('ensinomoz_session');document.getElementById('userBadge').classList.remove('show');showOverlay();}
+function showUserBadge(){
+  const b=document.getElementById('userBadge');if(!currentUser||!b)return;
+  b.classList.add('show');
+  const avatarEl=document.getElementById('userAvatar');
+  const textEl=document.getElementById('userAvatarText');
+  document.getElementById('userName').textContent=currentUser.nome.split(' ')[0];
+  // Try Gravatar for email photo
+  if(currentUser.email){
+    const emailHash=currentUser.email.trim().toLowerCase();
+    // Use DiceBear Avatars as reliable fallback (generates based on email)
+    const avatarUrl=`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.nome)}&backgroundColor=1a4fbf&textColor=ffffff&fontSize=40`;
+    avatarEl.innerHTML=`<img src="${avatarUrl}" alt="${currentUser.nome}" onerror="this.style.display='none';document.getElementById('userAvatarText').style.display='flex'">`;
+  } else {
+    if(textEl) textEl.textContent=currentUser.nome.charAt(0).toUpperCase();
+  }
+}
 function showMsg(el,type,txt){el.className='auth-msg '+type;el.textContent=txt;}
 
 // ═══════════════════════════════════════════════
-//  DOCUMENTOS — Firebase Firestore + Pastas
+//  RECUPERAR SENHA
+// ═══════════════════════════════════════════════
+async function doRecover(){
+  const email=document.getElementById('recEmail').value.trim().toLowerCase();
+  const pass=document.getElementById('recPass').value;
+  const pass2=document.getElementById('recPass2').value;
+  const msg=document.getElementById('recMsg');
+  if(!email||!pass||!pass2){showMsg(msg,'err','⚠️ Preencha todos os campos.');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showMsg(msg,'err','⚠️ Email inválido.');return;}
+  if(pass.length<6){showMsg(msg,'err','⚠️ Nova senha deve ter pelo menos 6 caracteres.');return;}
+  if(pass!==pass2){showMsg(msg,'err','⚠️ As senhas não coincidem.');return;}
+  showMsg(msg,'ok','⏳ A verificar…');
+  await fbReady();
+  if(!window._fb){showMsg(msg,'err','❌ Firebase não carregou. Verifique a ligação.');return;}
+  try{
+    const {db,doc,getDoc,setDoc}=window._fb;
+    const ref=doc(db,'users',email);
+    const snap=await getDoc(ref);
+    if(!snap.exists()){showMsg(msg,'err','❌ Email não encontrado no sistema.');return;}
+    const user=snap.data();
+    const updatedUser={...user,pass:btoa(unescape(encodeURIComponent(pass)))};
+    await setDoc(ref,updatedUser);
+    showMsg(msg,'ok','✅ Senha alterada com sucesso! A entrar…');
+    setTimeout(()=>{loginUser(updatedUser);},1200);
+  }catch(e){showMsg(msg,'err','❌ Erro: '+e.message);}
+}
+
+// ═══════════════════════════════════════════════
+//  SISTEMA DE PASTAS (por disciplina)
+// ═══════════════════════════════════════════════
+function getFolders(uid){
+  const db2=JSON.parse(localStorage.getItem('ensinomoz_v2')||'{}');
+  if(!db2[uid])db2[uid]={l:[],p:[],folders:[]};
+  if(!db2[uid].folders)db2[uid].folders=[];
+  return db2[uid].folders;
+}
+function saveFolders(uid,folders){
+  const db2=JSON.parse(localStorage.getItem('ensinomoz_v2')||'{}');
+  if(!db2[uid])db2[uid]={l:[],p:[],folders:[]};
+  db2[uid].folders=folders;
+  localStorage.setItem('ensinomoz_v2',JSON.stringify(db2));
+  DB=db2;
+}
+function renderFolderBar(container,uid,activeFolder,onSelect){
+  const folders=getFolders(uid);
+  container.innerHTML=`
+    <div class="folder-bar">
+      <span class="folder-chip ${!activeFolder?'active':''}" onclick="(${onSelect.toString()})('')">📂 Todos</span>
+      ${folders.map((f,i)=>`
+        <span class="folder-chip ${activeFolder===f?'active':''}" onclick="(${onSelect.toString()})('${f.replace(/'/g,"\\'")}')">
+          📁 ${f}
+          <button class="folder-chip-del" title="Renomear pasta" onclick="event.stopPropagation();renameFolderUI('${uid}','${f.replace(/'/g,"\\'")}',${i})">✏️</button>
+          <button class="folder-chip-del" title="Eliminar pasta" onclick="event.stopPropagation();deleteFolderUI('${uid}','${f.replace(/'/g,"\\'")}')">×</button>
+        </span>`).join('')}
+      <button class="btn-new-folder" onclick="newFolderUI('${uid}')">+ Nova Pasta</button>
+    </div>`;
+}
+function newFolderUI(uid){
+  const name=prompt('Nome da nova pasta:');
+  if(!name||!name.trim())return;
+  const folders=getFolders(uid);
+  if(folders.includes(name.trim())){toast('⚠️','Essa pasta já existe!');return;}
+  folders.push(name.trim());
+  saveFolders(uid,folders);
+  renderLessons();renderPDFs();
+  toast('📁','Pasta criada: '+name.trim());
+}
+function renameFolderUI(uid,oldName,idx){
+  const newName=prompt('Novo nome para "'+oldName+'":',oldName);
+  if(!newName||!newName.trim()||newName.trim()===oldName)return;
+  const folders=getFolders(uid);
+  folders[idx]=newName.trim();
+  saveFolders(uid,folders);
+  // rename references in lessons and pdfs
+  const d=gd(uid);
+  d.l.forEach(l=>{if(l.folder===oldName)l.folder=newName.trim();});
+  d.p.forEach(p=>{if(p.folder===oldName)p.folder=newName.trim();});
+  save();renderLessons();renderPDFs();
+  toast('✏️','Pasta renomeada para: '+newName.trim());
+}
+function deleteFolderUI(uid,name){
+  if(!confirm('Eliminar pasta "'+name+'"? Os itens dentro ficam sem pasta.'))return;
+  const folders=getFolders(uid).filter(f=>f!==name);
+  saveFolders(uid,folders);
+  const d=gd(uid);
+  d.l.forEach(l=>{if(l.folder===name)delete l.folder;});
+  d.p.forEach(p=>{if(p.folder===name)delete p.folder;});
+  save();renderLessons();renderPDFs();
+  toast('🗑','Pasta eliminada.');
+}
+let activeAulaFolder='';
+let activePDFFolder='';
+
+// ═══════════════════════════════════════════════
+//  DOCUMENTOS — Firebase Firestore
 // ═══════════════════════════════════════════════
 function docsColName(){return 'docs-'+(cur?cur.cls+'-'+cur.id:'global');}
 
@@ -1424,33 +1424,26 @@ async function renderDocs(){
   const badge=document.getElementById('docsUserBadge');
   if(!list)return;
   if(currentUser&&badge)badge.textContent='👤 '+currentUser.nome.split(' ')[0]+' · '+currentUser.prof;
-  renderFolders();
   list.innerHTML='<div style="text-align:center;padding:2rem;color:#aaa;font-size:var(--sm)">⏳ A carregar…</div>';
   empty.style.display='none';
-  await fbReady();
-  if(!window._fb){list.innerHTML='<div style="color:#c94060;padding:1rem">❌ Sem ligação ao Firebase.</div>';return;}
   try{
     const {db,collection,getDocs,query,orderBy}=window._fb;
     const col=collection(db,docsColName());
     const q=query(col,orderBy('ts','desc'));
     const snap=await getDocs(q);
-    let docs=snap.docs.map(d=>({...d.data(),_id:d.id}));
-    // Filtrar por pasta
-    if(currentFolder!=='__all__'){
-      docs=docs.filter(d=>(d.folder||'')=== currentFolder);
-    }
+    const docs=snap.docs.map(d=>({...d.data(),_id:d.id}));
     if(!docs.length){list.innerHTML='';empty.style.display='';return;}
-    const tc={'📋':'#EAF0FC','✏️':'#EAF0FC','📝':'#FCE8EC','📚':'#E3EEFF','🖼️':'#F3EEFB','📎':'#EAF0FC'};
+    const tc={'📋':'#EAF0FC','✏️':'#FDF2E8','📝':'#FCE8EC','📚':'#E8F4EE','🖼️':'#F3EEFB','📎':'#FDF6E3'};
     list.innerHTML=docs.map(d=>`
       <div class="doc-card">
-        <div class="doc-icon" style="background:${tc[d.tipo]||'#EAF0FC'}">${d.tipo}</div>
+        <div class="doc-icon" style="background:${tc[d.tipo]||'#f5f5f5'}">${d.tipo}</div>
         <div class="doc-meta">
           <div class="doc-name">${d.nome}</div>
-          <div class="doc-by">Por <strong>${d.autor}</strong> · ${d.prof} · ${new Date(d.ts).toLocaleDateString('pt-MZ')}${d.folder?` · 📂 ${d.folder}`:''}</div>
+          <div class="doc-by">Por <strong>${d.autor}</strong> · ${d.prof} · ${d.tel} · ${new Date(d.ts).toLocaleDateString('pt-MZ')}</div>
           ${d.desc?`<div style="font-size:var(--xs);color:#666;margin-top:.2rem">${d.desc}</div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
-          <a class="doc-dl" href="${d.link}" target="_blank" rel="noopener" download>⬇ Baixar</a>
+          <a class="doc-dl" href="${d.link}" target="_blank" rel="noopener">⬇ Baixar</a>
           ${currentUser&&currentUser.id==d.uid?`<button onclick="docApagar('${d._id}')" style="font-family:var(--fm);font-size:var(--xs);background:none;border:none;color:#ccc;cursor:pointer">🗑 apagar</button>`:''}
         </div>
       </div>`).join('');
@@ -1468,12 +1461,11 @@ async function docEnviar(){
   if(!/^https?:\/\//.test(linkRaw)){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='⚠️ O link deve começar com https://';return;}
   // Converte automaticamente qualquer link Google Drive para download directo
   const link=converterLinkDrive(linkRaw);
-  const folder=document.getElementById('docFolderSel')?.value||'';
-  msg.style.cssText='display:block;background:#EAF0FC;color:#888';msg.textContent='⏳ A enviar…';
+  msg.style.cssText='display:block;background:#FDF6E3;color:#888';msg.textContent='⏳ A enviar…';
   try{
     const {db,collection,addDoc}=window._fb;
     await addDoc(collection(db,docsColName()),{
-      nome,link,tipo,desc,folder,
+      nome,link,tipo,desc,
       autor:currentUser.nome,prof:currentUser.prof,tel:currentUser.tel,
       uid:currentUser.id,ts:Date.now()
     });
@@ -1522,10 +1514,7 @@ async function docApagar(docId){
 renderHome();
 authInit();
 const _origSwitchTab=switchTab;
-switchTab=function(name,btn){
-  _origSwitchTab(name,btn);
-  if(name==='docs'){currentFolder='__all__';renderFolders();renderDocs();}
-};
+switchTab=function(name,btn){_origSwitchTab(name,btn);if(name==='docs')renderDocs();};
 </script>
 </body>
 </html>
