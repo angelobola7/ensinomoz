@@ -7,61 +7,41 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script type="module">
 // ═══════════════════════════════════════════════
-//  FIREBASE — Configuração do projecto EnsinoMoz
+//  FIREBASE — EnsinoMoz (Firestore)
 // ═══════════════════════════════════════════════
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,doc,getDoc,setDoc,collection,addDoc,getDocs,deleteDoc,query,orderBy}
+  from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCHf03q-In_nqDn1rQxJdd-Fnh9gkoPaYI",
-  authDomain: "ensinomoz-87dc2.firebaseapp.com",
-  projectId: "ensinomoz-87dc2",
-  storageBucket: "ensinomoz-87dc2.firebasestorage.app",
-  messagingSenderId: "115177656465",
-  appId: "1:115177656465:web:f4df7750527734cc622f30"
+const firebaseConfig={
+  apiKey:"AIzaSyCHf03q-In_nqDn1rQxJdd-Fnh9gkoPaYI",
+  authDomain:"ensinomoz-87dc2.firebaseapp.com",
+  projectId:"ensinomoz-87dc2",
+  storageBucket:"ensinomoz-87dc2.firebasestorage.app",
+  messagingSenderId:"115177656465",
+  appId:"1:115177656465:web:f4df7750527734cc622f30"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-
-// ── Utilizadores ──
-async function fbGetUsers(){
-  try{
-    const snap = await getDoc(doc(db,'ensinomoz','users'));
-    return snap.exists() ? (snap.data().list || []) : [];
-  }catch(e){return [];}
-}
-async function fbSaveUsers(list){
-  await setDoc(doc(db,'ensinomoz','users'), {list}, {merge:true});
+try{
+  const app=initializeApp(firebaseConfig);
+  const db=getFirestore(app);
+  window._fb={db,doc,getDoc,setDoc,collection,addDoc,getDocs,deleteDoc,query,orderBy};
+}catch(e){
+  console.error('Firebase init error:',e);
+  window._fb=null;
 }
 
-// ── Documentos ──
-function docsDocId(){return 'docs-'+(window._cur?window._cur.cls+'-'+window._cur.id:'global');}
-async function fbGetDocs(){
-  try{
-    const snap = await getDoc(doc(db,'ensinomoz', docsDocId()));
-    return snap.exists() ? (snap.data().list || []) : [];
-  }catch(e){return [];}
-}
-async function fbSaveDocs(list){
-  await setDoc(doc(db,'ensinomoz', docsDocId()), {list}, {merge:true});
-}
-
-// ── Expõe funções ao escopo global ──
-window._fb = { fbGetUsers, fbSaveUsers, fbGetDocs, fbSaveDocs };
-window._fbReady = true;
-// Notifica o sistema que o Firebase está pronto
-document.dispatchEvent(new Event('fbReady'));
+// Dispara evento para avisar o script principal que o Firebase está pronto
+window.dispatchEvent(new Event('fb-ready'));
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0E0E12; --paper:#F7F4EE; --cream:#EDE8DC; --mist:#D4CFCA;
-  --saffron:#E8842A; --cobalt:#1A4FBF; --sage:#3C7A5A;
+  --ink:#0A1628; --paper:#F0F5FF; --cream:#D8E4F8; --mist:#B8CCF0;
+  --saffron:#1A4FBF; --cobalt:#1A4FBF; --sage:#1565C0;
   --rose:#C94060; --gold:#C9A84C; --violet:#6B3FA0; --teal:#1A8A8A;
-  --saffron-t:#FDF2E8; --cobalt-t:#EAF0FC; --sage-t:#E8F4EE;
+  --saffron-t:#EAF0FC; --cobalt-t:#EAF0FC; --sage-t:#E3EEFF;
   --rose-t:#FCE8EC; --gold-t:#FDF6E3; --violet-t:#F3EEFB; --teal-t:#E5F5F5;
   --fd:'Fraunces',Georgia,serif; --fb:'DM Sans',sans-serif; --fm:'DM Mono',monospace;
   --xs:.64rem; --sm:.8rem; --base:1rem; --md:1.25rem; --lg:1.563rem;
@@ -239,12 +219,6 @@ textarea.finput{min-height:80px;resize:vertical;}
 .toast{position:fixed;bottom:var(--s6);right:var(--s6);background:var(--ink);color:var(--paper);font-family:var(--fb);font-size:var(--sm);font-weight:500;padding:var(--s4) var(--s5);border-radius:var(--r8);box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:9999;transform:translateY(120%);opacity:0;transition:transform .3s,opacity .3s;display:flex;align-items:center;gap:var(--s3);}
 .toast.show{transform:translateY(0);opacity:1;}
 
-/* SIM NAV BUTTONS */
-.sim-nav-btn{font-family:var(--fb);font-weight:600;font-size:var(--sm);padding:var(--s3) var(--s5);border:1.5px solid var(--mist);border-radius:var(--rpill);background:#fff;color:#888;cursor:pointer;transition:all .15s;}
-.sim-nav-btn:hover{border-color:var(--ink);color:var(--ink);}
-.sim-nav-btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
-.sn-panel{animation:fadeUp .3s ease both;}
-
 hr.div{border:none;border-top:1.5px solid var(--cream);}
 
 footer{background:var(--ink);color:var(--paper);padding:var(--s7) 0;margin-top:var(--s8);}
@@ -287,7 +261,20 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
 .doc-by{font-family:var(--fm);font-size:var(--xs);color:#aaa;margin-top:.15rem;}
 .doc-dl{font-family:var(--fb);font-size:var(--xs);font-weight:600;color:var(--cobalt);background:var(--cobalt-t);border:1px solid var(--cobalt);padding:.35rem .85rem;border-radius:var(--rpill);cursor:pointer;white-space:nowrap;text-decoration:none;}
 .doc-dl:hover{background:var(--cobalt);color:#fff;}
-@media(max-width:768px){
+/* FOLDERS */
+.folder-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+.folder-chip{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--fm);font-size:var(--xs);padding:.3rem .75rem;border-radius:var(--rpill);border:1.5px solid var(--cream);background:#fff;cursor:pointer;transition:all .15s;}
+.folder-chip:hover,.folder-chip.on{background:var(--cobalt);color:#fff;border-color:var(--cobalt);}
+.folder-chip .fc-del{margin-left:.3rem;opacity:.5;font-size:.7rem;}
+.folder-chip:hover .fc-del{opacity:1;}
+.folder-add-btn{display:inline-flex;align-items:center;gap:.3rem;font-family:var(--fm);font-size:var(--xs);padding:.3rem .75rem;border-radius:var(--rpill);border:1.5px dashed var(--mist);background:transparent;cursor:pointer;color:#888;transition:all .15s;}
+.folder-add-btn:hover{border-color:var(--cobalt);color:var(--cobalt);}
+/* AVATAR PHOTO */
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--cobalt);color:#fff;font-family:var(--fd);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.75rem;overflow:hidden;border:2px solid rgba(255,255,255,.3);}
+.user-avatar img{width:100%;height:100%;object-fit:cover;}
+/* RECOVER */
+.auth-link{font-family:var(--fm);font-size:var(--xs);color:var(--cobalt);cursor:pointer;text-decoration:underline;}
+.auth-link:hover{opacity:.75;}
   .hero h1{font-size:var(--2xl);}
   .sgrid,.pgrid{grid-template-columns:1fr;}
   .fgrid,.sim-grid{grid-template-columns:1fr;}
@@ -309,6 +296,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
     <div class="auth-tabs">
       <button class="auth-tab on" onclick="authTab('login')">Entrar</button>
       <button class="auth-tab" onclick="authTab('register')">Criar Conta</button>
+      <button class="auth-tab" id="authTabRecover" onclick="authTab('recover')" style="display:none">🔑 Recuperar</button>
     </div>
     <div class="auth-body">
       <div class="auth-panel on" id="apLogin">
@@ -316,7 +304,20 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
         <div class="auth-field"><label>Senha</label><input type="password" id="liPass" placeholder="••••••••"></div>
         <button class="auth-btn" onclick="doLogin()">→ Entrar na Plataforma</button>
         <div class="auth-msg" id="liMsg"></div>
-        <div style="text-align:center;margin-top:1rem;font-family:var(--fm);font-size:var(--xs);color:#888">Não tem conta? <a href="#" onclick="authTab('register');return false" style="color:var(--cobalt)">Cadastre-se gratuitamente</a></div>
+        <div style="text-align:center;margin-top:.75rem;font-family:var(--fm);font-size:var(--xs);color:#888">
+          <span class="auth-link" onclick="authTab('recover')">Esqueci a minha senha</span>
+        </div>
+        <div style="text-align:center;margin-top:.5rem;font-family:var(--fm);font-size:var(--xs);color:#888">Não tem conta? <a href="#" onclick="authTab('register');return false" style="color:var(--cobalt)">Cadastre-se gratuitamente</a></div>
+      </div>
+      <!-- RECUPERAR SENHA -->
+      <div class="auth-panel" id="apRecover">
+        <div style="text-align:center;font-size:1.5rem;margin-bottom:.5rem">🔑</div>
+        <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;text-align:center;margin-bottom:.25rem">Recuperar Senha</div>
+        <div style="font-family:var(--fm);font-size:var(--xs);color:#888;text-align:center;margin-bottom:1rem">Introduza o seu email — iremos mostrar a sua senha de segurança</div>
+        <div class="auth-field"><label>Email da conta</label><input type="email" id="recEmail" placeholder="o.seu@email.com"></div>
+        <button class="auth-btn" style="background:var(--cobalt)" onclick="doRecover()">🔍 Recuperar Senha</button>
+        <div class="auth-msg" id="recMsg"></div>
+        <div style="text-align:center;margin-top:1rem;font-family:var(--fm);font-size:var(--xs)"><span class="auth-link" onclick="authTab('login')">← Voltar ao Login</span></div>
       </div>
       <div class="auth-panel" id="apRegister">
         <div class="auth-field-row">
@@ -549,378 +550,135 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
     </div>
   </div>
 
-  <!-- TAB SIMULADOR (Física 7ª/8ª = Newton+MRU | Física 12ª = Átomo) -->
+  <!-- TAB SIMULADOR (só Física) -->
   <div class="tc" id="tc-sim">
     <div class="page">
-
-      <!-- ════ CABEÇALHO DO SIMULADOR (dinâmico) ════ -->
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1.5px solid var(--cream)">
-        <div style="width:56px;height:56px;background:var(--cobalt-t);border:1.5px solid var(--cobalt);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.6rem" id="simHeaderIcon">⚛️</div>
+        <div style="width:56px;height:56px;background:var(--cobalt-t);border:1.5px solid var(--cobalt);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.6rem">⚛️</div>
         <div>
-          <h2 style="font-family:var(--fd);font-size:var(--xl);font-weight:700;letter-spacing:-.015em;margin-bottom:.2rem" id="simHeaderTitle">Simulador</h2>
-          <div style="font-family:var(--fm);font-size:var(--xs);color:#aaa;letter-spacing:.08em" id="simHeaderSub">Física</div>
+          <h2 style="font-family:var(--fd);font-size:var(--xl);font-weight:700;letter-spacing:-.015em;margin-bottom:.2rem">Simulador — Níveis de Energia</h2>
+          <div style="font-family:var(--fm);font-size:var(--xs);color:#aaa;letter-spacing:.08em">Modelação Computacional · Átomo de Hidrogénio · Física 12ª Classe</div>
         </div>
         <span style="margin-left:auto;font-family:var(--fm);font-size:var(--xs);background:var(--cobalt-t);color:var(--cobalt);border:1.5px solid var(--cobalt);padding:.25rem .75rem;border-radius:var(--rpill);white-space:nowrap">⚡ Interactivo</span>
       </div>
 
-      <!-- ════ PAINEL NEWTON (7ª e 8ª) ════ -->
-      <div id="simNewtonPanel" style="display:none">
-
-        <!-- Selector de simulação -->
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem">
-          <button class="sim-nav-btn on" onclick="showSimNewton('mrua',this)">🚗 MRU / MRUa</button>
-          <button class="sim-nav-btn" onclick="showSimNewton('lei1',this)">⚖️ 1ª Lei de Newton</button>
-          <button class="sim-nav-btn" onclick="showSimNewton('lei2',this)">🏋️ 2ª Lei de Newton</button>
-          <button class="sim-nav-btn" onclick="showSimNewton('lei3',this)">🤝 3ª Lei de Newton</button>
+      <div class="sim-wrap">
+        <div class="sim-bar">
+          <span class="sim-dot" style="background:#ff5f57"></span>
+          <span class="sim-dot" style="background:#febc2e"></span>
+          <span class="sim-dot" style="background:#28c840"></span>
+          <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">Níveis de Energia — Átomo de Hidrogénio</span>
         </div>
-
-        <!-- ── SIM 1: MRU / MRUa ── -->
-        <div id="sn-mrua" class="sn-panel">
-          <div class="sim-wrap">
-            <div class="sim-bar">
-              <span class="sim-dot" style="background:#ff5f57"></span>
-              <span class="sim-dot" style="background:#febc2e"></span>
-              <span class="sim-dot" style="background:#28c840"></span>
-              <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">MRU · MRUa — Cinemática</span>
+        <div class="sim-body">
+          <div class="sim-grid">
+            <div class="sim-panel">
+              <div class="sim-panel-title">📊 Gráfico de Níveis de Energia</div>
+              <canvas id="simChart" style="max-height:300px"></canvas>
             </div>
-            <div class="sim-body">
-              <!-- Canvas animação -->
-              <canvas id="canvasMRUA" width="700" height="120" style="width:100%;border-radius:8px;background:#f0f4ff;border:1.5px solid var(--cream);margin-bottom:1.5rem;display:block"></canvas>
-              <div class="sim-grid">
-                <div class="sim-panel">
-                  <div class="sim-panel-title">🎛️ Parâmetros</div>
-                  <div class="frow">
-                    <label class="flabel">Tipo de movimento</label>
-                    <select class="finput" id="mruaTipo" onchange="resetMRUA()">
-                      <option value="mru">MRU — Velocidade constante</option>
-                      <option value="mrua">MRUa — Aceleração constante</option>
-                    </select>
-                  </div>
-                  <div class="frow">
-                    <label class="flabel">Posição inicial x₀ (m)</label>
-                    <input class="finput" type="number" id="mruaX0" value="0" step="1">
-                  </div>
-                  <div class="frow">
-                    <label class="flabel">Velocidade inicial v₀ (m/s)</label>
-                    <input class="finput" type="number" id="mruaV0" value="5" step="1">
-                  </div>
-                  <div class="frow" id="mruaARow">
-                    <label class="flabel">Aceleração a (m/s²)</label>
-                    <input class="finput" type="number" id="mruaA" value="2" step="0.5">
-                  </div>
-                  <div class="frow">
-                    <label class="flabel">Tempo total T (s)</label>
-                    <input class="finput" type="number" id="mruaT" value="6" step="1" min="1" max="30">
-                  </div>
-                  <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap">
-                    <button class="btn-p" onclick="calcMRUA()" style="flex:1;justify-content:center">▶ Simular</button>
-                    <button class="btn-q" onclick="resetMRUA()" style="flex:1;justify-content:center">↺ Reset</button>
-                  </div>
-                </div>
-                <div class="sim-panel">
-                  <div class="sim-panel-title">📊 Gráfico x(t) e v(t)</div>
-                  <canvas id="chartMRUA" style="max-height:260px"></canvas>
-                </div>
+            <div class="sim-panel">
+              <div class="sim-panel-title">🎛️ Simular Transição</div>
+              <div class="frow">
+                <label class="flabel">Nível Inicial nᵢ (maior)</label>
+                <select class="finput" id="simNi">
+                  <option value="2">n = 2</option>
+                  <option value="3" selected>n = 3</option>
+                  <option value="4">n = 4</option>
+                  <option value="5">n = 5</option>
+                  <option value="6">n = 6</option>
+                </select>
               </div>
-              <div class="sim-result" id="mruaResult">
-                <div style="font-family:var(--fm);font-size:var(--xs);letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:.75rem">Resultados</div>
-                <div class="sim-rg" id="mruaRG"></div>
+              <div class="frow">
+                <label class="flabel">Nível Final n_f (menor)</label>
+                <select class="finput" id="simNf">
+                  <option value="1" selected>n = 1</option>
+                  <option value="2">n = 2</option>
+                  <option value="3">n = 3</option>
+                  <option value="4">n = 4</option>
+                  <option value="5">n = 5</option>
+                </select>
               </div>
-              <!-- Tabela -->
-              <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin:1.5rem 0 1rem">Tabela t → x → v</div>
-              <div class="sim-table-wrap"><table class="sim-table"><thead><tr><th>t (s)</th><th>x (m)</th><th>v (m/s)</th><th>Δx (m)</th></tr></thead><tbody id="mruaTBody"></tbody></table></div>
-              <!-- Fórmulas -->
-              <div style="background:var(--cobalt-t);border:1.5px solid var(--cobalt);border-radius:var(--r8);padding:var(--s5);margin-top:1.5rem">
-                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:var(--s3);color:var(--cobalt)">📐 Fórmulas</div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--s4);font-size:var(--sm)">
-                  <div><b>MRU — posição:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(26,79,191,.1);padding:.2rem .5rem;border-radius:4px">x = x₀ + v₀ · t</code></div>
-                  <div><b>MRUa — posição:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(26,79,191,.1);padding:.2rem .5rem;border-radius:4px">x = x₀ + v₀t + ½at²</code></div>
-                  <div><b>MRUa — velocidade:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(26,79,191,.1);padding:.2rem .5rem;border-radius:4px">v = v₀ + a · t</code></div>
-                  <div><b>Torricelli:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(26,79,191,.1);padding:.2rem .5rem;border-radius:4px">v² = v₀² + 2a·Δx</code></div>
+              <button class="btn-p" style="width:100%;justify-content:center" onclick="simCalc()">⚡ Calcular Transição</button>
+              <div style="background:var(--cobalt-t);border:1px solid var(--cobalt);border-radius:var(--r8);padding:var(--s4);margin-top:var(--s4)">
+                <div style="font-weight:600;font-size:var(--sm);margin-bottom:.5rem;color:var(--cobalt)">Séries Espectrais</div>
+                <div style="font-size:var(--xs);line-height:2;color:#444">
+                  <div>🟣 <b>Lyman</b> → nf=1 · Ultravioleta</div>
+                  <div>🔵 <b>Balmer</b> → nf=2 · Visível</div>
+                  <div>🔴 <b>Paschen</b> → nf=3 · Infravermelho</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- ── SIM 2: 1ª Lei (Inércia) ── -->
-        <div id="sn-lei1" class="sn-panel" style="display:none">
-          <div class="sim-wrap">
-            <div class="sim-bar">
-              <span class="sim-dot" style="background:#ff5f57"></span>
-              <span class="sim-dot" style="background:#febc2e"></span>
-              <span class="sim-dot" style="background:#28c840"></span>
-              <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">1ª Lei de Newton — Princípio da Inércia</span>
-            </div>
-            <div class="sim-body">
-              <div style="background:var(--cobalt-t);border:1.5px solid var(--cobalt);border-radius:var(--r8);padding:var(--s5);margin-bottom:1.5rem">
-                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;color:var(--cobalt);margin-bottom:.5rem">📖 Enunciado</div>
-                <p style="font-size:var(--sm);line-height:1.7;color:#333"><em>"Todo o corpo permanece em repouso ou em movimento rectilíneo uniforme enquanto a força resultante que actua sobre ele for nula."</em></p>
-              </div>
-              <!-- Canvas animação inércia -->
-              <canvas id="canvasLei1" width="700" height="130" style="width:100%;border-radius:8px;background:#f5f0ff;border:1.5px solid var(--cream);margin-bottom:1.5rem;display:block"></canvas>
-              <div class="sim-grid">
-                <div class="sim-panel">
-                  <div class="sim-panel-title">🎛️ Cenário</div>
-                  <div class="frow">
-                    <label class="flabel">Estado inicial</label>
-                    <select class="finput" id="lei1Estado" onchange="resetLei1()">
-                      <option value="repouso">Corpo em repouso (F=0)</option>
-                      <option value="mru">Corpo em MRU (F=0)</option>
-                    </select>
-                  </div>
-                  <div class="frow" id="lei1VRow">
-                    <label class="flabel">Velocidade (m/s)</label>
-                    <input class="finput" type="number" id="lei1V" value="4" step="1">
-                  </div>
-                  <div class="frow">
-                    <label class="flabel">Massa do corpo (kg)</label>
-                    <input class="finput" type="number" id="lei1M" value="5" step="1" min="1">
-                  </div>
-                  <div style="background:var(--rose-t);border:1px solid var(--rose);border-radius:var(--r8);padding:var(--s4);margin-top:.75rem;font-size:var(--xs);color:var(--rose);line-height:1.7">
-                    ⚖️ <b>Força Resultante = 0 N</b><br>O corpo não acelera. A massa <b>não</b> influencia o estado de movimento quando F=0.
-                  </div>
-                  <button class="btn-p" onclick="animLei1()" style="width:100%;justify-content:center;margin-top:1rem">▶ Animar</button>
-                  <button class="btn-q" onclick="resetLei1()" style="width:100%;justify-content:center;margin-top:.5rem">↺ Reset</button>
-                </div>
-                <div class="sim-panel">
-                  <div class="sim-panel-title">📊 Gráfico de Forças</div>
-                  <canvas id="chartLei1" style="max-height:260px"></canvas>
-                  <div style="margin-top:1rem;font-size:var(--xs);color:#666;line-height:1.8">
-                    <div>🔵 Peso (P = m·g) ↓</div>
-                    <div>🟢 Normal (N) ↑</div>
-                    <div>🔴 Força Resultante (FR) = P + N = <b>0</b></div>
-                  </div>
-                </div>
-              </div>
-              <!-- Exemplos do quotidiano -->
-              <div style="margin-top:1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem">
-                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🚗</div><b>Carro a travar</b><br>Passageiros continuam em movimento — inércia!</div>
-                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">⚽</div><b>Bola no espaço</b><br>Sem atrito nem gravidade, move-se para sempre.</div>
-                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">📚</div><b>Livro na mesa</b><br>Em repouso porque N + P = 0. Inércia de repouso.</div>
-              </div>
+          <div class="sim-result" id="simResult">
+            <div style="font-family:var(--fm);font-size:var(--xs);letter-spacing:.12em;text-transform:uppercase;color:#666">Resultado da Transição</div>
+            <div class="sim-rg" id="simRG"></div>
+          </div>
+
+          <div style="background:var(--sage-t);border:1.5px solid var(--sage);border-radius:var(--r8);padding:var(--s5);margin-bottom:var(--s5)">
+            <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:var(--s3);color:var(--sage)">📐 Fórmulas</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:var(--s4);font-size:var(--sm)">
+              <div><b>Energia do nível:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">Eₙ = −13,6 / n² (eV)</code></div>
+              <div><b>Energia da transição:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">ΔE = |Eᵢ − E_f| (eV)</code></div>
+              <div><b>Comprimento de onda:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">λ = hc / ΔE (nm)</code></div>
             </div>
           </div>
-        </div>
 
-        <!-- ── SIM 3: 2ª Lei (F=ma) ── -->
-        <div id="sn-lei2" class="sn-panel" style="display:none">
-          <div class="sim-wrap">
-            <div class="sim-bar">
-              <span class="sim-dot" style="background:#ff5f57"></span>
-              <span class="sim-dot" style="background:#febc2e"></span>
-              <span class="sim-dot" style="background:#28c840"></span>
-              <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">2ª Lei de Newton — F = m·a</span>
-            </div>
-            <div class="sim-body">
-              <div style="background:var(--sage-t);border:1.5px solid var(--sage);border-radius:var(--r8);padding:var(--s5);margin-bottom:1.5rem">
-                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;color:var(--sage);margin-bottom:.5rem">📖 Enunciado</div>
-                <p style="font-size:var(--sm);line-height:1.7;color:#333"><em>"A aceleração de um corpo é directamente proporcional à força resultante que actua sobre ele e inversamente proporcional à sua massa."</em><br><strong style="font-size:var(--md)">F = m · a</strong></p>
-              </div>
-              <canvas id="canvasLei2" width="700" height="130" style="width:100%;border-radius:8px;background:#f0fff4;border:1.5px solid var(--cream);margin-bottom:1.5rem;display:block"></canvas>
-              <div class="sim-grid">
-                <div class="sim-panel">
-                  <div class="sim-panel-title">🎛️ Parâmetros</div>
-                  <div class="frow">
-                    <label class="flabel">Massa m (kg)</label>
-                    <input class="finput" type="range" id="lei2M" min="1" max="20" value="5" oninput="lei2Update()">
-                    <div style="text-align:center;font-family:var(--fm);font-size:var(--sm);font-weight:700;margin-top:.3rem" id="lei2MVal">5 kg</div>
-                  </div>
-                  <div class="frow">
-                    <label class="flabel">Força F (N)</label>
-                    <input class="finput" type="range" id="lei2F" min="1" max="100" value="20" oninput="lei2Update()">
-                    <div style="text-align:center;font-family:var(--fm);font-size:var(--sm);font-weight:700;margin-top:.3rem" id="lei2FVal">20 N</div>
-                  </div>
-                  <div style="background:var(--ink);color:var(--paper);border-radius:var(--r8);padding:1rem;margin-top:1rem;text-align:center">
-                    <div style="font-family:var(--fm);font-size:var(--xs);color:#888;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Aceleração resultante</div>
-                    <div style="font-family:var(--fd);font-size:var(--2xl);font-weight:700" id="lei2AVal">4,00 m/s²</div>
-                    <div style="font-size:var(--xs);color:#aaa;margin-top:.3rem">a = F / m</div>
-                  </div>
-                  <button class="btn-p" onclick="animLei2()" style="width:100%;justify-content:center;margin-top:1rem">▶ Animar</button>
-                  <button class="btn-q" onclick="resetLei2()" style="width:100%;justify-content:center;margin-top:.5rem">↺ Reset</button>
-                </div>
-                <div class="sim-panel">
-                  <div class="sim-panel-title">📊 a × m (F fixo) e a × F (m fixo)</div>
-                  <canvas id="chartLei2" style="max-height:260px"></canvas>
-                </div>
-              </div>
-              <!-- Tabela F,m → a -->
-              <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin:1.5rem 0 1rem">Tabela F × m → a</div>
-              <div class="sim-table-wrap"><table class="sim-table"><thead><tr><th>F (N)</th><th>m (kg)</th><th>a (m/s²)</th><th>Observação</th></tr></thead><tbody id="lei2TBody"></tbody></table></div>
-              <div style="background:var(--sage-t);border:1.5px solid var(--sage);border-radius:var(--r8);padding:var(--s5);margin-top:1.5rem">
-                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:var(--s3);color:var(--sage)">📐 Fórmulas derivadas</div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--s4);font-size:var(--sm)">
-                  <div><b>Força:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">F = m · a (N)</code></div>
-                  <div><b>Massa:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">m = F / a (kg)</code></div>
-                  <div><b>Aceleração:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">a = F / m (m/s²)</code></div>
-                  <div><b>Peso:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">P = m · g (g≈10)</code></div>
-                </div>
-              </div>
-            </div>
+          <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:var(--s4)">Tabela de Transições Espectrais</div>
+          <div class="sim-table-wrap">
+            <table class="sim-table">
+              <thead><tr><th>Série</th><th>Transição</th><th>ΔE (eV)</th><th>λ (nm)</th><th>Região</th></tr></thead>
+              <tbody id="simTBody"></tbody>
+            </table>
           </div>
         </div>
-
-        <!-- ── SIM 4: 3ª Lei (Acção-Reacção) ── -->
-        <div id="sn-lei3" class="sn-panel" style="display:none">
-          <div class="sim-wrap">
-            <div class="sim-bar">
-              <span class="sim-dot" style="background:#ff5f57"></span>
-              <span class="sim-dot" style="background:#febc2e"></span>
-              <span class="sim-dot" style="background:#28c840"></span>
-              <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">3ª Lei de Newton — Acção e Reacção</span>
-            </div>
-            <div class="sim-body">
-              <div style="background:var(--rose-t);border:1.5px solid var(--rose);border-radius:var(--r8);padding:var(--s5);margin-bottom:1.5rem">
-                <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;color:var(--rose);margin-bottom:.5rem">📖 Enunciado</div>
-                <p style="font-size:var(--sm);line-height:1.7;color:#333"><em>"Para toda a acção existe uma reacção igual em módulo, oposta em sentido e na mesma direcção, mas aplicada em corpos diferentes."</em><br><strong>F₁₂ = −F₂₁</strong></p>
-              </div>
-              <canvas id="canvasLei3" width="700" height="150" style="width:100%;border-radius:8px;background:#fff0f3;border:1.5px solid var(--cream);margin-bottom:1.5rem;display:block"></canvas>
-              <div class="sim-grid">
-                <div class="sim-panel">
-                  <div class="sim-panel-title">🎛️ Parâmetros</div>
-                  <div class="frow">
-                    <label class="flabel">Cenário</label>
-                    <select class="finput" id="lei3Cena" onchange="resetLei3()">
-                      <option value="blocos">Dois blocos em contacto</option>
-                      <option value="foguete">Foguete / propulsão</option>
-                      <option value="pulo">Pessoa a saltar do barco</option>
-                    </select>
-                  </div>
-                  <div class="frow">
-                    <label class="flabel">Massa do Corpo A (kg)</label>
-                    <input class="finput" type="number" id="lei3MA" value="5" step="1" min="1">
-                  </div>
-                  <div class="frow">
-                    <label class="flabel">Massa do Corpo B (kg)</label>
-                    <input class="finput" type="number" id="lei3MB" value="3" step="1" min="1">
-                  </div>
-                  <div class="frow">
-                    <label class="flabel">Força de Acção F (N)</label>
-                    <input class="finput" type="number" id="lei3F" value="15" step="1" min="1">
-                  </div>
-                  <div style="display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap">
-                    <button class="btn-p" onclick="calcLei3()" style="flex:1;justify-content:center">⚡ Calcular</button>
-                    <button class="btn-q" onclick="resetLei3()" style="flex:1;justify-content:center">↺ Reset</button>
-                  </div>
-                </div>
-                <div class="sim-panel">
-                  <div class="sim-panel-title">📊 Forças de Acção e Reacção</div>
-                  <canvas id="chartLei3" style="max-height:260px"></canvas>
-                  <div class="sim-result" id="lei3Result" style="margin-top:1rem">
-                    <div class="sim-rg" id="lei3RG"></div>
-                  </div>
-                </div>
-              </div>
-              <!-- Exemplos -->
-              <div style="margin-top:1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem">
-                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🚀</div><b>Foguete</b><br>Gases expulsos para baixo → foguete sobe.</div>
-                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🏊</div><b>Natação</b><br>Nadador empurra água para trás → avança.</div>
-                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🦅</div><b>Pássaro a voar</b><br>Asas empurram ar para baixo → sobe.</div>
-                <div style="background:#fff;border:1.5px solid var(--cream);border-radius:var(--r8);padding:1rem;font-size:var(--xs)"><div style="font-size:1.5rem;margin-bottom:.5rem">🔫</div><b>Recuo da arma</b><br>Bala para a frente → arma recua.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div><!-- /simNewtonPanel -->
-
-      <!-- ════ PAINEL ÁTOMO (12ª) ════ -->
-      <div id="simAtomPanel" style="display:none">
-        <div style="margin-bottom:1rem;font-family:var(--fm);font-size:var(--xs);color:#aaa;letter-spacing:.08em">Modelação Computacional · Átomo de Hidrogénio · Física 12ª Classe</div>
-        <div class="sim-wrap">
-          <div class="sim-bar">
-            <span class="sim-dot" style="background:#ff5f57"></span>
-            <span class="sim-dot" style="background:#febc2e"></span>
-            <span class="sim-dot" style="background:#28c840"></span>
-            <span style="font-family:var(--fm);font-size:var(--xs);color:#666;margin-left:.5rem">Níveis de Energia — Átomo de Hidrogénio</span>
-          </div>
-          <div class="sim-body">
-            <div class="sim-grid">
-              <div class="sim-panel">
-                <div class="sim-panel-title">📊 Gráfico de Níveis de Energia</div>
-                <canvas id="simChart" style="max-height:300px"></canvas>
-              </div>
-              <div class="sim-panel">
-                <div class="sim-panel-title">🎛️ Simular Transição</div>
-                <div class="frow">
-                  <label class="flabel">Nível Inicial nᵢ (maior)</label>
-                  <select class="finput" id="simNi">
-                    <option value="2">n = 2</option>
-                    <option value="3" selected>n = 3</option>
-                    <option value="4">n = 4</option>
-                    <option value="5">n = 5</option>
-                    <option value="6">n = 6</option>
-                  </select>
-                </div>
-                <div class="frow">
-                  <label class="flabel">Nível Final n_f (menor)</label>
-                  <select class="finput" id="simNf">
-                    <option value="1" selected>n = 1</option>
-                    <option value="2">n = 2</option>
-                    <option value="3">n = 3</option>
-                    <option value="4">n = 4</option>
-                    <option value="5">n = 5</option>
-                  </select>
-                </div>
-                <button class="btn-p" style="width:100%;justify-content:center" onclick="simCalc()">⚡ Calcular Transição</button>
-                <div style="background:var(--cobalt-t);border:1px solid var(--cobalt);border-radius:var(--r8);padding:var(--s4);margin-top:var(--s4)">
-                  <div style="font-weight:600;font-size:var(--sm);margin-bottom:.5rem;color:var(--cobalt)">Séries Espectrais</div>
-                  <div style="font-size:var(--xs);line-height:2;color:#444">
-                    <div>🟣 <b>Lyman</b> → nf=1 · Ultravioleta</div>
-                    <div>🔵 <b>Balmer</b> → nf=2 · Visível</div>
-                    <div>🔴 <b>Paschen</b> → nf=3 · Infravermelho</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="sim-result" id="simResult">
-              <div style="font-family:var(--fm);font-size:var(--xs);letter-spacing:.12em;text-transform:uppercase;color:#666">Resultado da Transição</div>
-              <div class="sim-rg" id="simRG"></div>
-            </div>
-            <div style="background:var(--sage-t);border:1.5px solid var(--sage);border-radius:var(--r8);padding:var(--s5);margin-bottom:var(--s5)">
-              <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:var(--s3);color:var(--sage)">📐 Fórmulas</div>
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:var(--s4);font-size:var(--sm)">
-                <div><b>Energia do nível:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">Eₙ = −13,6 / n² (eV)</code></div>
-                <div><b>Energia da transição:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">ΔE = |Eᵢ − E_f| (eV)</code></div>
-                <div><b>Comprimento de onda:</b><br><code style="font-family:var(--fm);font-size:var(--xs);background:rgba(60,122,90,.12);padding:.2rem .5rem;border-radius:4px">λ = hc / ΔE (nm)</code></div>
-              </div>
-            </div>
-            <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:var(--s4)">Tabela de Transições Espectrais</div>
-            <div class="sim-table-wrap">
-              <table class="sim-table">
-                <thead><tr><th>Série</th><th>Transição</th><th>ΔE (eV)</th><th>λ (nm)</th><th>Região</th></tr></thead>
-                <tbody id="simTBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div><!-- /simAtomPanel -->
-
+      </div>
     </div>
   </div>
 
   <!-- TAB DOCUMENTOS -->
   <div class="tc" id="tc-docs">
     <div class="page">
-      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1.5px solid var(--cream)">
-        <div style="width:56px;height:56px;background:var(--gold-t);border:1.5px solid var(--gold);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.6rem">📁</div>
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1.5px solid var(--cream)">
+        <div style="width:56px;height:56px;background:var(--cobalt-t);border:1.5px solid var(--cobalt);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.6rem">📁</div>
         <div><h2 style="font-family:var(--fd);font-size:var(--xl);font-weight:700;margin-bottom:.2rem">Documentos da Comunidade</h2><div style="font-family:var(--fm);font-size:var(--xs);color:#aaa">Partilha de Materiais</div></div>
-        <span id="docsUserBadge" style="margin-left:auto;font-family:var(--fm);font-size:var(--xs);background:var(--sage-t);color:var(--sage);border:1.5px solid var(--sage);padding:.25rem .75rem;border-radius:var(--rpill);white-space:nowrap"></span>
+        <span id="docsUserBadge" style="margin-left:auto;font-family:var(--fm);font-size:var(--xs);background:var(--cobalt-t);color:var(--cobalt);border:1.5px solid var(--cobalt);padding:.25rem .75rem;border-radius:var(--rpill);white-space:nowrap"></span>
       </div>
-      <div style="margin-bottom:2rem">
+
+      <!-- PASTAS -->
+      <div style="margin-bottom:1.5rem">
+        <div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-bottom:.75rem">📂 Pastas</div>
+        <div class="folder-bar" id="folderBar">
+          <button class="folder-chip on" onclick="selectFolder('__all__',this)">📁 Todos</button>
+        </div>
+        <div style="display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap" id="folderActions">
+          <input class="finput" id="newFolderName" placeholder="Nome da nova pasta…" style="max-width:200px;font-size:var(--xs);padding:.35rem .6rem">
+          <button class="btn-p" onclick="addFolder()" style="padding:.35rem .85rem;font-size:var(--xs)">➕ Criar Pasta</button>
+          <button class="btn-q" id="renameFolderBtn" style="padding:.35rem .85rem;font-size:var(--xs);display:none" onclick="renameFolder()">✏️ Renomear</button>
+          <button class="btn-q" id="deleteFolderBtn" style="padding:.35rem .85rem;font-size:var(--xs);display:none;color:var(--rose)" onclick="deleteFolder()">🗑 Apagar Pasta</button>
+        </div>
+      </div>
+
+      <!-- ENVIAR -->
+      <div style="margin-bottom:2rem;background:#fff;border:1.5px solid var(--cream);border-radius:var(--r16);padding:1.5rem">
         <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:1rem">📤 Enviar Documento</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
           <div class="frow"><label class="flabel">Nome *</label><input class="finput" id="docNome" placeholder="Ex: Resumo Capítulo 4"></div>
           <div class="frow"><label class="flabel">Tipo</label><select class="finput" id="docTipo"><option value="📋">📋 Resumo</option><option value="✏️">✏️ Exercícios</option><option value="📝">📝 Exame</option><option value="📚">📚 Livro</option><option value="📎">📎 Outro</option></select></div>
         </div>
+        <div class="frow" style="margin-bottom:1rem"><label class="flabel">Pasta</label>
+          <select class="finput" id="docFolderSel"><option value="">📁 Sem pasta (Geral)</option></select>
+        </div>
         <div class="frow" style="margin-bottom:1rem"><label class="flabel">Link (Google Drive, Dropbox…) *</label><input class="finput" id="docLink" placeholder="https://drive.google.com/..."></div>
         <div class="frow" style="margin-bottom:1rem"><label class="flabel">Descrição (opcional)</label><input class="finput" id="docDesc" placeholder="Breve descrição…"></div>
-        <button class="btn-p" onclick="docEnviar()" style="background:var(--sage);border-color:var(--sage)">📤 Enviar Documento</button>
+        <button class="btn-p" onclick="docEnviar()" style="background:var(--cobalt);border-color:var(--cobalt)">📤 Enviar Documento</button>
         <div id="docMsg" style="display:none;margin-top:.75rem;font-family:var(--fm);font-size:var(--xs);padding:.6rem 1rem;border-radius:var(--r8)"></div>
       </div>
+
+      <!-- LISTA -->
       <div>
         <div style="font-family:var(--fd);font-size:var(--lg);font-weight:700;margin-bottom:1rem">📥 Documentos Disponíveis</div>
         <div id="docList"></div>
-        <div id="docEmpty" style="display:none;text-align:center;padding:3rem;color:#aaa"><div style="font-size:3rem">📭</div><div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-top:1rem">Nenhum documento ainda</div><div style="font-size:var(--sm);margin-top:.5rem">Seja o primeiro a partilhar!</div></div>
+        <div id="docEmpty" style="display:none;text-align:center;padding:3rem;color:#aaa"><div style="font-size:3rem">📭</div><div style="font-family:var(--fd);font-size:var(--md);font-weight:700;margin-top:1rem">Nenhum documento nesta pasta</div><div style="font-size:var(--sm);margin-top:.5rem">Seja o primeiro a partilhar!</div></div>
       </div>
     </div>
   </div>
@@ -1105,13 +863,9 @@ function openSub(id,cls,cycle){
       </div>
     </div>`;
 
-  // Simulador: Física 12ª (átomos) + Física 7ª e 8ª (Newton/MRU)
-  const isPhysics12 = (id==='fis2' && cls==='12');
-  const isPhysics78 = (id==='fis' && (cls==='7' || cls==='8'));
-  const isPhysics = isPhysics12 || isPhysics78;
+  // Simulador só em Física
+  const isPhysics = (id==='fis2' && cls==='12');
   document.getElementById('tabSim').style.display = isPhysics ? '' : 'none';
-  // marca qual tipo de simulador está activo
-  document.getElementById('tc-sim').dataset.simType = isPhysics78 ? 'newton' : 'atom';
 
   // reset tabs
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
@@ -1136,11 +890,7 @@ function switchTab(name,btn){
   if(name==='aulas')renderLessons();
   if(name==='pdfs')renderPDFs();
   if(name==='gerir')renderManage();
-  if(name==='sim'){
-    const simType=document.getElementById('tc-sim').dataset.simType;
-    if(simType==='newton') setTimeout(initSimNewton,60);
-    else setTimeout(initSim,60);
-  }
+  if(name==='sim')setTimeout(initSim,60);
 }
 
 function gotoGerir(){
@@ -1323,435 +1073,7 @@ function toast(icon,msg){
 }
 
 // ═══════════════════════════════════════════════
-//  SIMULADOR NEWTON — INIT (7ª e 8ª Classe)
-// ═══════════════════════════════════════════════
-let _newtonInited=false;
-let _mruaChart=null, _lei1Chart=null, _lei2Chart=null, _lei3Chart=null;
-let _mruaAnim=null, _lei1Anim=null, _lei2Anim=null, _lei3Anim=null;
-
-function initSimNewton(){
-  if(_newtonInited)return;
-  _newtonInited=true;
-  // Actualiza cabeçalho
-  document.getElementById('simHeaderIcon').textContent='🚗';
-  document.getElementById('simHeaderTitle').textContent='Simuladores — Mecânica & Leis de Newton';
-  document.getElementById('simHeaderSub').textContent='MRU · MRUa · 1ª · 2ª · 3ª Lei de Newton · Física 7ª e 8ª Classe';
-  document.getElementById('simNewtonPanel').style.display='';
-  document.getElementById('simAtomPanel').style.display='none';
-  // Mostra primeiro painel
-  showSimNewton('mrua', document.querySelector('.sim-nav-btn'));
-  // inicia estado do 2ª lei
-  lei2Update();
-  buildLei2Table();
-}
-
-function showSimNewton(key,btn){
-  document.querySelectorAll('.sn-panel').forEach(p=>p.style.display='none');
-  document.querySelectorAll('.sim-nav-btn').forEach(b=>b.classList.remove('on'));
-  document.getElementById('sn-'+key).style.display='';
-  btn.classList.add('on');
-  if(key==='mrua' && !_mruaChart) initChartMRUA();
-  if(key==='lei1' && !_lei1Chart) initChartLei1();
-  if(key==='lei2' && !_lei2Chart) initChartLei2();
-  if(key==='lei3' && !_lei3Chart) initChartLei3();
-  // draw canvases
-  if(key==='mrua') drawCanvasMRUA(parseFloat(document.getElementById('mruaX0').value)||0, 0, 0);
-  if(key==='lei1') drawCanvasLei1(0.5);
-  if(key==='lei2') drawCanvasLei2(0);
-  if(key==='lei3') drawCanvasLei3();
-}
-
-// ─────────────── MRU / MRUa ───────────────
-function initChartMRUA(){
-  const ctx=document.getElementById('chartMRUA').getContext('2d');
-  _mruaChart=new Chart(ctx,{
-    type:'line',
-    data:{labels:[],datasets:[
-      {label:'x(t) — posição (m)',data:[],borderColor:'#1A4FBF',backgroundColor:'rgba(26,79,191,.08)',tension:.3,pointRadius:3},
-      {label:'v(t) — velocidade (m/s)',data:[],borderColor:'#E8842A',backgroundColor:'rgba(232,132,42,.08)',tension:.3,pointRadius:3,borderDash:[5,3]}
-    ]},
-    options:{responsive:true,animation:{duration:400},plugins:{legend:{position:'top'}},scales:{x:{title:{display:true,text:'Tempo (s)'}},y:{title:{display:true,text:'x (m) / v (m/s)'}}}}
-  });
-}
-
-function drawCanvasMRUA(x, xMax, progress){
-  const c=document.getElementById('canvasMRUA');if(!c)return;
-  const ctx=c.getContext('2d');
-  const W=c.width,H=c.height;
-  ctx.clearRect(0,0,W,H);
-  // estrada
-  ctx.fillStyle='#dde3f0';ctx.fillRect(0,H*0.65,W,H*0.35);
-  ctx.fillStyle='#bbbfcc';ctx.fillRect(0,H*0.62,W,8);
-  // linhas tracejadas
-  ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.setLineDash([20,15]);
-  ctx.beginPath();ctx.moveTo(0,H*0.78);ctx.lineTo(W,H*0.78);ctx.stroke();
-  ctx.setLineDash([]);
-  // carro
-  const norm = xMax>0 ? Math.min(x/xMax,1) : 0;
-  const carX = 40 + norm*(W-120);
-  const carY = H*0.38;
-  // corpo carro
-  ctx.fillStyle='#1A4FBF';ctx.beginPath();
-  ctx.roundRect(carX,carY,80,30,6);ctx.fill();
-  // tecto
-  ctx.fillStyle='#0e316b';ctx.beginPath();
-  ctx.roundRect(carX+10,carY-18,60,20,4);ctx.fill();
-  // janelas
-  ctx.fillStyle='rgba(200,230,255,.7)';
-  ctx.fillRect(carX+14,carY-15,20,14);
-  ctx.fillRect(carX+42,carY-15,20,14);
-  // rodas
-  [carX+15,carX+55].forEach(wx=>{
-    ctx.fillStyle='#222';ctx.beginPath();ctx.arc(wx,carY+30,10,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#aaa';ctx.beginPath();ctx.arc(wx,carY+30,5,0,Math.PI*2);ctx.fill();
-  });
-  // seta velocidade
-  if(xMax>0){
-    ctx.strokeStyle='#E8842A';ctx.lineWidth=3;ctx.setLineDash([]);
-    ctx.beginPath();ctx.moveTo(carX+80,carY+10);ctx.lineTo(carX+80+40,carY+10);ctx.stroke();
-    ctx.fillStyle='#E8842A';ctx.beginPath();ctx.moveTo(carX+120,carY+10);ctx.lineTo(carX+110,carY+5);ctx.lineTo(carX+110,carY+15);ctx.fill();
-    ctx.fillStyle='#E8842A';ctx.font='bold 11px monospace';ctx.fillText('v →',carX+83,carY+7);
-  }
-  // label posição
-  ctx.fillStyle='#333';ctx.font='bold 13px sans-serif';
-  ctx.fillText('x = '+x.toFixed(1)+' m',10,18);
-}
-
-function calcMRUA(){
-  const tipo=document.getElementById('mruaTipo').value;
-  const x0=parseFloat(document.getElementById('mruaX0').value)||0;
-  const v0=parseFloat(document.getElementById('mruaV0').value)||0;
-  const a=tipo==='mru'?0:(parseFloat(document.getElementById('mruaA').value)||0);
-  const T=parseFloat(document.getElementById('mruaT').value)||6;
-  const steps=Math.round(T)+1;
-  const labels=[],xs=[],vs=[];
-  let rows='';
-  for(let i=0;i<=steps;i++){
-    const t=i;
-    const xt=x0+v0*t+0.5*a*t*t;
-    const vt=v0+a*t;
-    labels.push(t+'s');xs.push(+xt.toFixed(2));vs.push(+vt.toFixed(2));
-    const dx=i===0?'-':((xt-(x0+v0*(i-1)+0.5*a*(i-1)*(i-1))).toFixed(2)+' m');
-    rows+=`<tr><td>${t}</td><td>${xt.toFixed(2)}</td><td>${vt.toFixed(2)}</td><td>${dx}</td></tr>`;
-  }
-  if(_mruaChart){_mruaChart.data.labels=labels;_mruaChart.data.datasets[0].data=xs;_mruaChart.data.datasets[1].data=vs;_mruaChart.update();}
-  document.getElementById('mruaTBody').innerHTML=rows;
-  const xFinal=xs[xs.length-1];
-  const vFinal=vs[vs.length-1];
-  const dist=xFinal-x0;
-  document.getElementById('mruaResult').style.display='block';
-  document.getElementById('mruaRG').innerHTML=`
-    <div class="sim-ri"><div class="sim-rl">Tipo</div><div class="sim-rv" style="font-size:var(--md)">${tipo.toUpperCase()}</div></div>
-    <div class="sim-ri"><div class="sim-rl">x final</div><div class="sim-rv">${xFinal.toFixed(2)} m</div></div>
-    <div class="sim-ri"><div class="sim-rl">v final</div><div class="sim-rv">${vFinal.toFixed(2)} m/s</div></div>
-    <div class="sim-ri"><div class="sim-rl">Distância</div><div class="sim-rv">${dist.toFixed(2)} m</div></div>
-    <div class="sim-ri"><div class="sim-rl">Aceleração</div><div class="sim-rv">${a.toFixed(2)} m/s²</div></div>
-    <div class="sim-ri"><div class="sim-rl">Tempo</div><div class="sim-rv">${T} s</div></div>`;
-  // anima carro
-  if(_mruaAnim)cancelAnimationFrame(_mruaAnim);
-  let t0=null;
-  const dur=Math.min(T*600,6000);
-  function step(ts){
-    if(!t0)t0=ts;
-    const frac=Math.min((ts-t0)/dur,1);
-    const t=frac*T;
-    const xt=x0+v0*t+0.5*a*t*t;
-    drawCanvasMRUA(xt,xFinal,frac);
-    if(frac<1)_mruaAnim=requestAnimationFrame(step);
-  }
-  _mruaAnim=requestAnimationFrame(step);
-  toast('🚗','Simulação MRU'+(tipo==='mrua'?'a':'')+' calculada!');
-}
-
-function resetMRUA(){
-  document.getElementById('mruaResult').style.display='none';
-  document.getElementById('mruaTBody').innerHTML='';
-  const tipo=document.getElementById('mruaTipo').value;
-  document.getElementById('mruaARow').style.display=tipo==='mru'?'none':'';
-  if(_mruaChart){_mruaChart.data.labels=[];_mruaChart.data.datasets.forEach(d=>d.data=[]);_mruaChart.update();}
-  if(_mruaAnim)cancelAnimationFrame(_mruaAnim);
-  drawCanvasMRUA(parseFloat(document.getElementById('mruaX0').value)||0,0,0);
-}
-
-// ─────────────── 1ª LEI ───────────────
-function initChartLei1(){
-  const ctx=document.getElementById('chartLei1').getContext('2d');
-  _lei1Chart=new Chart(ctx,{
-    type:'bar',
-    data:{labels:['Peso (P)','Normal (N)','Resultante (FR)'],datasets:[{
-      label:'Força (N)',
-      data:[0,0,0],
-      backgroundColor:['rgba(26,79,191,.7)','rgba(60,122,90,.7)','rgba(201,64,96,.7)'],
-      borderColor:['#1A4FBF','#3C7A5A','#C94060'],
-      borderWidth:2,borderRadius:6
-    }]},
-    options:{responsive:true,animation:{duration:400},plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Força (N)'},beginAtZero:true}}}
-  });
-  lei1UpdateChart();
-}
-
-function lei1UpdateChart(){
-  const m=parseFloat(document.getElementById('lei1M').value)||5;
-  const P=m*10;
-  if(_lei1Chart){
-    _lei1Chart.data.datasets[0].data=[P,P,0];
-    _lei1Chart.update();
-  }
-}
-
-function drawCanvasLei1(frac){
-  const c=document.getElementById('canvasLei1');if(!c)return;
-  const ctx=c.getContext('2d');
-  const W=c.width,H=c.height;
-  ctx.clearRect(0,0,W,H);
-  const est=document.getElementById('lei1Estado').value;
-  // chão
-  ctx.fillStyle='#e8e0f5';ctx.fillRect(0,H*0.75,W,H*0.25);
-  ctx.fillStyle='#c5b8e8';ctx.fillRect(0,H*0.72,W,6);
-  if(est==='repouso'){
-    // bloco parado
-    ctx.fillStyle='#6B3FA0';ctx.fillRect(W/2-30,H*0.45,60,60*0.72/0.75*0.3);
-    ctx.fillStyle='#8B5FC0';ctx.fillRect(W/2-28,H*0.47,56,24);
-    ctx.fillStyle='#EEE';ctx.font='bold 11px monospace';ctx.textAlign='center';
-    ctx.fillText('REPOUSO',W/2,H*0.62);
-    // setas N e P
-    ctx.strokeStyle='#3C7A5A';ctx.lineWidth=3;
-    ctx.beginPath();ctx.moveTo(W/2,H*0.45);ctx.lineTo(W/2,H*0.15);ctx.stroke();
-    ctx.fillStyle='#3C7A5A';ctx.beginPath();ctx.moveTo(W/2,H*0.12);ctx.lineTo(W/2-6,H*0.18);ctx.lineTo(W/2+6,H*0.18);ctx.fill();
-    ctx.fillText('N',W/2+12,H*0.22);
-    ctx.strokeStyle='#1A4FBF';ctx.lineWidth=3;
-    ctx.beginPath();ctx.moveTo(W/2,H*0.72);ctx.lineTo(W/2,H*0.98);ctx.stroke();
-    ctx.fillStyle='#1A4FBF';ctx.beginPath();ctx.moveTo(W/2,H*1.0);ctx.lineTo(W/2-6,H*0.95);ctx.lineTo(W/2+6,H*0.95);ctx.fill();
-    ctx.fillText('P',W/2+12,H*0.92);
-    ctx.textAlign='left';
-  } else {
-    // bloco a mover
-    const bx=50+frac*(W-160);
-    ctx.fillStyle='#6B3FA0';
-    ctx.beginPath();ctx.roundRect(bx,H*0.45,70,35,6);ctx.fill();
-    ctx.fillStyle='#EEE';ctx.font='bold 11px monospace';ctx.textAlign='center';
-    ctx.fillText('v=const',bx+35,H*0.67);
-    // seta movimento
-    ctx.strokeStyle='#E8842A';ctx.lineWidth=3;
-    ctx.beginPath();ctx.moveTo(bx+70,H*0.62);ctx.lineTo(bx+110,H*0.62);ctx.stroke();
-    ctx.fillStyle='#E8842A';ctx.beginPath();ctx.moveTo(bx+112,H*0.62);ctx.lineTo(bx+102,H*0.57);ctx.lineTo(bx+102,H*0.67);ctx.fill();
-    ctx.textAlign='left';
-    // label FR=0
-    ctx.fillStyle='#C94060';ctx.font='bold 13px monospace';
-    ctx.fillText('FR = 0 N',W-120,25);
-  }
-}
-
-function animLei1(){
-  if(_lei1Anim)cancelAnimationFrame(_lei1Anim);
-  const est=document.getElementById('lei1Estado').value;
-  lei1UpdateChart();
-  if(est==='repouso'){drawCanvasLei1(0);toast('⚖️','Corpo em repouso — FR = 0 N');return;}
-  let t0=null;
-  function step(ts){
-    if(!t0)t0=ts;
-    const frac=(ts-t0)/4000%1;
-    drawCanvasLei1(frac);
-    _lei1Anim=requestAnimationFrame(step);
-  }
-  _lei1Anim=requestAnimationFrame(step);
-  toast('⚖️','MRU — Velocidade constante, FR = 0 N!');
-}
-
-function resetLei1(){
-  if(_lei1Anim)cancelAnimationFrame(_lei1Anim);
-  const est=document.getElementById('lei1Estado').value;
-  document.getElementById('lei1VRow').style.display=est==='repouso'?'none':'';
-  drawCanvasLei1(0);
-  lei1UpdateChart();
-}
-
-// ─────────────── 2ª LEI ───────────────
-function initChartLei2(){
-  const ctx=document.getElementById('chartLei2').getContext('2d');
-  _lei2Chart=new Chart(ctx,{
-    type:'line',
-    data:{labels:[],datasets:[
-      {label:'a(m) — F fixo (m/s²)',data:[],borderColor:'#3C7A5A',backgroundColor:'rgba(60,122,90,.08)',tension:.4,pointRadius:3},
-      {label:'a(F) — m fixo (m/s²)',data:[],borderColor:'#E8842A',backgroundColor:'rgba(232,132,42,.08)',tension:.4,pointRadius:3}
-    ]},
-    options:{responsive:true,animation:{duration:300},plugins:{legend:{position:'top'}},scales:{x:{title:{display:true,text:'m (kg) / F (N)'}},y:{title:{display:true,text:'Aceleração (m/s²)'},beginAtZero:true}}}
-  });
-  lei2RefreshChart();
-}
-
-function lei2Update(){
-  const m=parseFloat(document.getElementById('lei2M').value)||5;
-  const F=parseFloat(document.getElementById('lei2F').value)||20;
-  document.getElementById('lei2MVal').textContent=m+' kg';
-  document.getElementById('lei2FVal').textContent=F+' N';
-  const a=F/m;
-  document.getElementById('lei2AVal').textContent=a.toFixed(2)+' m/s²';
-  if(_lei2Chart)lei2RefreshChart();
-}
-
-function lei2RefreshChart(){
-  const F=parseFloat(document.getElementById('lei2F').value)||20;
-  const m=parseFloat(document.getElementById('lei2M').value)||5;
-  const ms=[1,2,3,5,8,10,15,20];
-  const Fs=[5,10,20,30,40,50,75,100];
-  const aM=ms.map(mi=>+(F/mi).toFixed(2));
-  const aF=Fs.map(fi=>+(fi/m).toFixed(2));
-  const labels=ms.map((mi,i)=>mi+' / '+Fs[i]);
-  if(_lei2Chart){
-    _lei2Chart.data.labels=labels;
-    _lei2Chart.data.datasets[0].data=aM;
-    _lei2Chart.data.datasets[1].data=aF;
-    _lei2Chart.update();
-  }
-}
-
-function buildLei2Table(){
-  const combos=[[10,2],[10,5],[20,2],[20,5],[50,5],[50,10],[100,5],[100,20]];
-  const rows=combos.map(([F,m])=>{
-    const a=F/m;
-    const obs=a>10?'Grande aceleração':a>5?'Moderada':a>2?'Pequena':'Muito pequena';
-    return`<tr><td>${F}</td><td>${m}</td><td>${a.toFixed(2)}</td><td>${obs}</td></tr>`;
-  }).join('');
-  const tb=document.getElementById('lei2TBody');if(tb)tb.innerHTML=rows;
-}
-
-function drawCanvasLei2(frac){
-  const c=document.getElementById('canvasLei2');if(!c)return;
-  const ctx=c.getContext('2d');
-  const W=c.width,H=c.height;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#e8f5ee';ctx.fillRect(0,H*0.75,W,H*0.25);
-  ctx.fillStyle='#b8d8c5';ctx.fillRect(0,H*0.72,W,6);
-  const F=parseFloat(document.getElementById('lei2F').value)||20;
-  const m=parseFloat(document.getElementById('lei2M').value)||5;
-  const a=F/m;
-  // bloco
-  const bw=40+m*3;
-  const bx=30+frac*(W-bw-60);
-  const by=H*0.45;
-  ctx.fillStyle='#3C7A5A';ctx.beginPath();ctx.roundRect(bx,by,bw,40,6);ctx.fill();
-  ctx.fillStyle='#fff';ctx.font='bold 11px monospace';ctx.textAlign='center';
-  ctx.fillText(m+' kg',bx+bw/2,by+25);
-  // seta F
-  const arrLen=Math.min(F*1.5,120);
-  ctx.strokeStyle='#E8842A';ctx.lineWidth=3;
-  ctx.beginPath();ctx.moveTo(bx-5,by+20);ctx.lineTo(bx-5-arrLen,by+20);ctx.stroke();
-  ctx.fillStyle='#E8842A';ctx.beginPath();ctx.moveTo(bx-3,by+20);ctx.lineTo(bx-13,by+15);ctx.lineTo(bx-13,by+25);ctx.fill();
-  ctx.font='bold 12px monospace';ctx.fillText('F='+F+'N',bx-5-arrLen/2,by+14);
-  // seta a
-  ctx.strokeStyle='#1A4FBF';ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(bx+bw,by+20);ctx.lineTo(bx+bw+60,by+20);ctx.stroke();
-  ctx.fillStyle='#1A4FBF';ctx.beginPath();ctx.moveTo(bx+bw+62,by+20);ctx.lineTo(bx+bw+52,by+15);ctx.lineTo(bx+bw+52,by+25);ctx.fill();
-  ctx.font='bold 11px monospace';ctx.fillText('a='+a.toFixed(1),bx+bw+15,by+14);
-  ctx.textAlign='left';
-}
-
-function animLei2(){
-  if(_lei2Anim)cancelAnimationFrame(_lei2Anim);
-  let t0=null;
-  function step(ts){
-    if(!t0)t0=ts;
-    const frac=Math.min((ts-t0)/3000,1);
-    drawCanvasLei2(frac);
-    if(frac<1)_lei2Anim=requestAnimationFrame(step);
-  }
-  _lei2Anim=requestAnimationFrame(step);
-  lei2RefreshChart();
-  toast('🏋️','F = m·a calculado!');
-}
-
-function resetLei2(){
-  if(_lei2Anim)cancelAnimationFrame(_lei2Anim);
-  lei2Update();
-  drawCanvasLei2(0);
-}
-
-// ─────────────── 3ª LEI ───────────────
-function initChartLei3(){
-  const ctx=document.getElementById('chartLei3').getContext('2d');
-  _lei3Chart=new Chart(ctx,{
-    type:'bar',
-    data:{labels:['Acção (F₁₂)','Reacção (F₂₁)'],datasets:[
-      {label:'Força (N)',data:[0,0],
-       backgroundColor:['rgba(26,79,191,.7)','rgba(201,64,96,.7)'],
-       borderColor:['#1A4FBF','#C94060'],borderWidth:2,borderRadius:8}
-    ]},
-    options:{responsive:true,animation:{duration:400},plugins:{legend:{display:false}},
-      scales:{y:{title:{display:true,text:'Força (N)'},beginAtZero:true}}}
-  });
-}
-
-function drawCanvasLei3(){
-  const c=document.getElementById('canvasLei3');if(!c)return;
-  const ctx=c.getContext('2d');
-  const W=c.width,H=c.height;
-  ctx.clearRect(0,0,W,H);
-  const cena=document.getElementById('lei3Cena').value;
-  const F=parseFloat(document.getElementById('lei3F').value)||15;
-  const mA=parseFloat(document.getElementById('lei3MA').value)||5;
-  const mB=parseFloat(document.getElementById('lei3MB').value)||3;
-  ctx.fillStyle='#fff0f3';ctx.fillRect(0,H*0.72,W,H*0.28);
-  ctx.fillStyle='#f5c0cc';ctx.fillRect(0,H*0.70,W,5);
-  const midX=W/2;
-  // Corpo A
-  const wA=Math.min(40+mA*4,80);
-  ctx.fillStyle='#1A4FBF';ctx.beginPath();ctx.roundRect(midX-wA-10,H*0.38,wA,50,6);ctx.fill();
-  ctx.fillStyle='#fff';ctx.font='bold 12px monospace';ctx.textAlign='center';
-  ctx.fillText('A · '+mA+'kg',midX-wA/2-10,H*0.67);
-  // Corpo B
-  const wB=Math.min(40+mB*4,80);
-  ctx.fillStyle='#C94060';ctx.beginPath();ctx.roundRect(midX+10,H*0.38,wB,50,6);ctx.fill();
-  ctx.fillStyle='#fff';
-  ctx.fillText('B · '+mB+'kg',midX+wB/2+10,H*0.67);
-  // Setas acção-reacção
-  const arrF=Math.min(F*1.8,100);
-  // Acção: A empurra B (→)
-  ctx.strokeStyle='#1A4FBF';ctx.lineWidth=3;
-  ctx.beginPath();ctx.moveTo(midX-10,H*0.5);ctx.lineTo(midX+10+wB+20,H*0.5);ctx.stroke();
-  ctx.fillStyle='#1A4FBF';ctx.beginPath();ctx.moveTo(midX+10+wB+22,H*0.5);ctx.lineTo(midX+10+wB+10,H*0.45);ctx.lineTo(midX+10+wB+10,H*0.55);ctx.fill();
-  ctx.font='bold 10px monospace';ctx.fillStyle='#1A4FBF';
-  ctx.fillText('F₁₂='+F+'N →',midX+10,H*0.42);
-  // Reacção: B empurra A (←)
-  ctx.strokeStyle='#C94060';ctx.lineWidth=3;
-  ctx.beginPath();ctx.moveTo(midX+12,H*0.6);ctx.lineTo(midX-wA-30,H*0.6);ctx.stroke();
-  ctx.fillStyle='#C94060';ctx.beginPath();ctx.moveTo(midX-wA-32,H*0.6);ctx.lineTo(midX-wA-22,H*0.55);ctx.lineTo(midX-wA-22,H*0.65);ctx.fill();
-  ctx.fillStyle='#C94060';
-  ctx.fillText('← F₂₁='+F+'N',midX-wA-10,H*0.55);
-  ctx.textAlign='left';
-}
-
-function calcLei3(){
-  const F=parseFloat(document.getElementById('lei3F').value)||15;
-  const mA=parseFloat(document.getElementById('lei3MA').value)||5;
-  const mB=parseFloat(document.getElementById('lei3MB').value)||3;
-  const aA=F/mA, aB=F/mB;
-  if(_lei3Chart){
-    _lei3Chart.data.datasets[0].data=[F,F];
-    _lei3Chart.update();
-  }
-  document.getElementById('lei3Result').style.display='block';
-  document.getElementById('lei3RG').innerHTML=`
-    <div style="font-family:var(--fm);font-size:var(--xs);letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:.75rem">Resultados</div>
-    <div class="sim-rg">
-      <div class="sim-ri"><div class="sim-rl">Acção F₁₂</div><div class="sim-rv">${F} N →</div><div class="sim-rs">Corpo A empurra B</div></div>
-      <div class="sim-ri"><div class="sim-rl">Reacção F₂₁</div><div class="sim-rv">${F} N ←</div><div class="sim-rs">Corpo B empurra A</div></div>
-      <div class="sim-ri"><div class="sim-rl">aₐ (aceleração A)</div><div class="sim-rv">${aA.toFixed(2)} m/s²</div><div class="sim-rs">a=F/mA</div></div>
-      <div class="sim-ri"><div class="sim-rl">aᵦ (aceleração B)</div><div class="sim-rv">${aB.toFixed(2)} m/s²</div><div class="sim-rs">a=F/mB</div></div>
-      <div class="sim-ri"><div class="sim-rl">|F₁₂| = |F₂₁|</div><div class="sim-rv">✓ Igual</div><div class="sim-rs">3ª Lei confirmada</div></div>
-    </div>`;
-  drawCanvasLei3();
-  toast('🤝','3ª Lei de Newton verificada!');
-}
-
-function resetLei3(){
-  document.getElementById('lei3Result').style.display='none';
-  if(_lei3Chart){_lei3Chart.data.datasets[0].data=[0,0];_lei3Chart.update();}
-  drawCanvasLei3();
-}
-
-// ═══════════════════════════════════════════════
-//  SIMULADOR — FÍSICA (NÍVEIS DE ENERGIA) — 12ª
+//  SIMULADOR — FÍSICA (NÍVEIS DE ENERGIA)
 // ═══════════════════════════════════════════════
 const RH=13.6, HC=1239.8;
 function En(n){return -RH/(n*n);}
@@ -1768,12 +1090,6 @@ function sColor(w){
 let simCI=null;
 
 function initSim(){
-  // Actualiza cabeçalho para átomo
-  document.getElementById('simHeaderIcon').textContent='⚛️';
-  document.getElementById('simHeaderTitle').textContent='Simulador — Níveis de Energia';
-  document.getElementById('simHeaderSub').textContent='Modelação Computacional · Átomo de Hidrogénio · Física 12ª Classe';
-  document.getElementById('simNewtonPanel').style.display='none';
-  document.getElementById('simAtomPanel').style.display='';
   if(simCI)return;
   const cv=document.getElementById('simChart');
   if(!cv)return;
@@ -1837,109 +1153,270 @@ function buildSimTable(){
 }
 
 // ═══════════════════════════════════════════════
+//  JSONBIN — BASE DE DADOS NA NUVEM
+// ═══════════════════════════════════════════════
+// (JSONBin removido — usando Firebase Firestore)
+function jbSaveBinId(n,id){localStorage.setItem('emoz_bin_'+n,id);}
+// Firebase helpers (definidos no módulo ES no topo do ficheiro)
+
+// ═══════════════════════════════════════════════
 //  AUTENTICAÇÃO — Firebase Firestore
 // ═══════════════════════════════════════════════
-let currentUser = null;
+let currentUser=null;
 
-// Aguarda Firebase ficar pronto antes de inicializar
-function authInit(){
-  const s = localStorage.getItem('ensinomoz_session');
-  if(s){try{currentUser=JSON.parse(s);showUserBadge();hideOverlay();}catch(e){showOverlay();}}
-  else showOverlay();
-}
-
-async function getUsers(){
-  if(window._fbReady) return await window._fb.fbGetUsers();
-  return JSON.parse(localStorage.getItem('emoz_users')||'[]');
-}
-async function saveUsers(list){
-  if(window._fbReady) return await window._fb.fbSaveUsers(list);
-  localStorage.setItem('emoz_users', JSON.stringify(list));
+// Aguarda Firebase estar pronto antes de iniciar auth
+function fbReady(){
+  return new Promise(resolve=>{
+    if(window._fb) return resolve();
+    window.addEventListener('fb-ready',resolve,{once:true});
+    // timeout de segurança 8s
+    setTimeout(()=>resolve(),8000);
+  });
 }
 
-async function doRegister(){
-  const nome  = document.getElementById('rgNome').value.trim();
-  const email = document.getElementById('rgEmail').value.trim().toLowerCase();
-  const pass  = document.getElementById('rgPass').value;
-  const pass2 = document.getElementById('rgPass2').value;
-  const prof  = document.getElementById('rgProf').value;
-  const tel   = document.getElementById('rgTel').value.trim();
-  const msg   = document.getElementById('rgMsg');
-  const btn   = document.querySelector('#apRegister .auth-btn');
-  if(!nome||!email||!pass||!prof||!tel){showMsg(msg,'err','⚠️ Preencha todos os campos obrigatórios.');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showMsg(msg,'err','⚠️ Email inválido.');return;}
-  if(pass.length<6){showMsg(msg,'err','⚠️ A senha deve ter pelo menos 6 caracteres.');return;}
-  if(pass!==pass2){showMsg(msg,'err','⚠️ As senhas não coincidem.');return;}
-  btn.textContent='⏳ A criar…'; btn.disabled=true;
-  showMsg(msg,'ok','⏳ A verificar…');
-  try{
-    const users = await getUsers();
-    if(users.find(u=>u.email===email)){showMsg(msg,'err','⚠️ Email já cadastrado. Faça login.');btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;return;}
-    const user = {id:Date.now(),nome,email,pass:btoa(pass),prof,tel,createdAt:new Date().toISOString()};
-    users.push(user);
-    await saveUsers(users);
-    showMsg(msg,'ok','✅ Conta criada! A entrar…');
-    setTimeout(()=>{loginUser(user);btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;},800);
-  }catch(e){showMsg(msg,'err','❌ Erro de ligação. Verifique a internet.');btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;}
-}
-
-async function doLogin(){
-  const email = document.getElementById('liEmail').value.trim().toLowerCase();
-  const pass  = document.getElementById('liPass').value;
-  const msg   = document.getElementById('liMsg');
-  const btn   = document.querySelector('#apLogin .auth-btn');
-  if(!email||!pass){showMsg(msg,'err','⚠️ Preencha email e senha.');return;}
-  btn.textContent='⏳ A verificar…'; btn.disabled=true;
-  showMsg(msg,'ok','⏳ A verificar…');
-  try{
-    const users = await getUsers();
-    const user  = users.find(u=>u.email===email && u.pass===btoa(pass));
-    if(!user){showMsg(msg,'err','❌ Email ou senha incorrectos.');btn.textContent='→ Entrar na Plataforma';btn.disabled=false;return;}
-    showMsg(msg,'ok','✅ Bem-vindo(a)! A entrar…');
-    setTimeout(()=>{loginUser(user);btn.textContent='→ Entrar na Plataforma';btn.disabled=false;},600);
-  }catch(e){showMsg(msg,'err','❌ Erro de ligação. Verifique a internet.');btn.textContent='→ Entrar na Plataforma';btn.disabled=false;}
-}
-
-function loginUser(user){
-  currentUser = user;
-  localStorage.setItem('ensinomoz_session', JSON.stringify(user));
-  showUserBadge();
-  hideOverlay();
-}
-function doLogout(){
-  currentUser=null;
-  localStorage.removeItem('ensinomoz_session');
-  document.getElementById('userBadge').classList.remove('show');
-  showOverlay();
+async function authInit(){
+  await fbReady();
+  const s=localStorage.getItem('ensinomoz_session');
+  if(s){
+    try{
+      currentUser=JSON.parse(s);
+      showUserBadge();
+      hideOverlay();
+    }catch(e){showOverlay();}
+  } else {
+    showOverlay();
+  }
 }
 function showOverlay(){document.getElementById('authOverlay').classList.remove('hidden');}
 function hideOverlay(){document.getElementById('authOverlay').classList.add('hidden');}
 function authTab(t){
-  document.querySelectorAll('.auth-tab').forEach((b,i)=>b.classList.toggle('on',i===(t==='login'?0:1)));
-  document.getElementById('apLogin').classList.toggle('on',t==='login');
-  document.getElementById('apRegister').classList.toggle('on',t==='register');
-  document.getElementById('liMsg').className='auth-msg';
-  document.getElementById('rgMsg').className='auth-msg';
+  const panels={login:'apLogin',register:'apRegister',recover:'apRecover'};
+  const tabs=['login','register'];
+  document.querySelectorAll('.auth-tab').forEach((b,i)=>b.classList.toggle('on',tabs[i]===t));
+  // recover tab visibility
+  const rt=document.getElementById('authTabRecover');
+  if(rt) rt.style.display=t==='recover'?'':'none';
+  Object.entries(panels).forEach(([k,id])=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.toggle('on',k===t);
+  });
+  ['liMsg','rgMsg','recMsg'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='auth-msg';});
 }
+
+// ─── RECUPERAÇÃO DE SENHA ───
+async function doRecover(){
+  const email=document.getElementById('recEmail').value.trim().toLowerCase();
+  const msg=document.getElementById('recMsg');
+  if(!email){showMsg(msg,'err','⚠️ Introduza o seu email.');return;}
+  showMsg(msg,'ok','⏳ A procurar conta…');
+  await fbReady();
+  if(!window._fb){showMsg(msg,'err','❌ Sem ligação ao Firebase.');return;}
+  try{
+    const {db,doc,getDoc}=window._fb;
+    const snap=await getDoc(doc(db,'users',email));
+    if(!snap.exists()){showMsg(msg,'err','❌ Nenhuma conta com este email.');return;}
+    const user=snap.data();
+    // Descodifica senha (base64)
+    let pass='';
+    try{pass=decodeURIComponent(escape(atob(user.pass)));}catch(e){pass='(não foi possível descodificar)';}
+    showMsg(msg,'ok',`✅ Conta encontrada!\n👤 ${user.nome}\n🔑 Senha: ${pass}\n\nGuarde e faça login.`);
+    msg.style.whiteSpace='pre-line';
+  }catch(e){showMsg(msg,'err','❌ Erro: '+e.message);}
+}
+
+// ─── AVATAR COM FOTO DO GOOGLE (Gravatar) ───
 function showUserBadge(){
-  const b=document.getElementById('userBadge'); if(!currentUser||!b)return;
+  const b=document.getElementById('userBadge');if(!currentUser||!b)return;
   b.classList.add('show');
-  document.getElementById('userAvatar').textContent=currentUser.nome.charAt(0).toUpperCase();
+  const av=document.getElementById('userAvatar');
+  const inicial=currentUser.nome.charAt(0).toUpperCase();
+  // Tenta carregar foto via Gravatar (usa hash MD5 do email)
+  const emailHash=md5(currentUser.email.trim().toLowerCase());
+  const gravatarUrl=`https://www.gravatar.com/avatar/${emailHash}?d=404&s=64`;
+  const img=new Image();
+  img.onload=()=>{av.innerHTML=`<img src="${gravatarUrl}" alt="${inicial}">`;};
+  img.onerror=()=>{av.innerHTML=inicial;av.style.fontSize='.75rem';};
+  img.src=gravatarUrl;
   document.getElementById('userName').textContent=currentUser.nome.split(' ')[0];
 }
+
+// MD5 simples para Gravatar
+function md5(str){
+  function safeAdd(x,y){const lsw=(x&0xFFFF)+(y&0xFFFF);const msw=(x>>16)+(y>>16)+(lsw>>16);return(msw<<16)|(lsw&0xFFFF);}
+  function bitRotateLeft(num,cnt){return(num<<cnt)|(num>>>(32-cnt));}
+  function md5cmn(q,a,b,x,s,t){return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b);}
+  function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|((~b)&d),a,b,x,s,t);}
+  function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&(~d)),a,b,x,s,t);}
+  function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t);}
+  function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|(~d)),a,b,x,s,t);}
+  const bs=[];for(let i=0;i<str.length*2;i+=8)bs[i>>5]|=(str.charCodeAt(i/8)&0xFF)<<(i%32);
+  const l=str.length*8;bs[l>>5]|=0x80<<(l%32);bs[(((l+64)>>>9)<<4)+14]=l;
+  let a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+  for(let i=0;i<bs.length;i+=16){
+    const oA=a,oB=b,oC=c,oD=d;
+    a=md5ff(a,b,c,d,bs[i],7,-680876936);d=md5ff(d,a,b,c,bs[i+1],12,-389564586);c=md5ff(c,d,a,b,bs[i+2],17,606105819);b=md5ff(b,c,d,a,bs[i+3],22,-1044525330);
+    a=md5ff(a,b,c,d,bs[i+4],7,-176418897);d=md5ff(d,a,b,c,bs[i+5],12,1200080426);c=md5ff(c,d,a,b,bs[i+6],17,-1473231341);b=md5ff(b,c,d,a,bs[i+7],22,-45705983);
+    a=md5ff(a,b,c,d,bs[i+8],7,1770035416);d=md5ff(d,a,b,c,bs[i+9],12,-1958414417);c=md5ff(c,d,a,b,bs[i+10],17,-42063);b=md5ff(b,c,d,a,bs[i+11],22,-1990404162);
+    a=md5ff(a,b,c,d,bs[i+12],7,1804603682);d=md5ff(d,a,b,c,bs[i+13],12,-40341101);c=md5ff(c,d,a,b,bs[i+14],17,-1502002290);b=md5ff(b,c,d,a,bs[i+15],22,1236535329);
+    a=md5gg(a,b,c,d,bs[i+1],5,-165796510);d=md5gg(d,a,b,c,bs[i+6],9,-1069501632);c=md5gg(c,d,a,b,bs[i+11],14,643717713);b=md5gg(b,c,d,a,bs[i],20,-373897302);
+    a=md5gg(a,b,c,d,bs[i+5],5,-701558691);d=md5gg(d,a,b,c,bs[i+10],9,38016083);c=md5gg(c,d,a,b,bs[i+15],14,-660478335);b=md5gg(b,c,d,a,bs[i+4],20,-405537848);
+    a=md5gg(a,b,c,d,bs[i+9],5,568446438);d=md5gg(d,a,b,c,bs[i+14],9,-1019803690);c=md5gg(c,d,a,b,bs[i+3],14,-187363961);b=md5gg(b,c,d,a,bs[i+8],20,1163531501);
+    a=md5gg(a,b,c,d,bs[i+13],5,-1444681467);d=md5gg(d,a,b,c,bs[i+2],9,-51403784);c=md5gg(c,d,a,b,bs[i+7],14,1735328473);b=md5gg(b,c,d,a,bs[i+12],20,-1926607734);
+    a=md5hh(a,b,c,d,bs[i+5],4,-378558);d=md5hh(d,a,b,c,bs[i+8],11,-2022574463);c=md5hh(c,d,a,b,bs[i+11],16,1839030562);b=md5hh(b,c,d,a,bs[i+14],23,-35309556);
+    a=md5hh(a,b,c,d,bs[i+1],4,-1530992060);d=md5hh(d,a,b,c,bs[i+4],11,1272893353);c=md5hh(c,d,a,b,bs[i+7],16,-155497632);b=md5hh(b,c,d,a,bs[i+10],23,-1094730640);
+    a=md5hh(a,b,c,d,bs[i+13],4,681279174);d=md5hh(d,a,b,c,bs[i],11,-358537222);c=md5hh(c,d,a,b,bs[i+3],16,-722521979);b=md5hh(b,c,d,a,bs[i+6],23,76029189);
+    a=md5hh(a,b,c,d,bs[i+9],4,-640364487);d=md5hh(d,a,b,c,bs[i+12],11,-421815835);c=md5hh(c,d,a,b,bs[i+15],16,530742520);b=md5hh(b,c,d,a,bs[i+2],23,-995338651);
+    a=md5ii(a,b,c,d,bs[i],6,-198630844);d=md5ii(d,a,b,c,bs[i+7],10,1126891415);c=md5ii(c,d,a,b,bs[i+14],15,-1416354905);b=md5ii(b,c,d,a,bs[i+5],21,-57434055);
+    a=md5ii(a,b,c,d,bs[i+12],6,1700485571);d=md5ii(d,a,b,c,bs[i+3],10,-1894986606);c=md5ii(c,d,a,b,bs[i+10],15,-1051523);b=md5ii(b,c,d,a,bs[i+1],21,-2054922799);
+    a=md5ii(a,b,c,d,bs[i+8],6,1873313359);d=md5ii(d,a,b,c,bs[i+15],10,-30611744);c=md5ii(c,d,a,b,bs[i+6],15,-1560198380);b=md5ii(b,c,d,a,bs[i+13],21,1309151649);
+    a=md5ii(a,b,c,d,bs[i+4],6,-145523070);d=md5ii(d,a,b,c,bs[i+11],10,-1120210379);c=md5ii(c,d,a,b,bs[i+2],15,718787259);b=md5ii(b,c,d,a,bs[i+9],21,-343485551);
+    a=safeAdd(a,oA);b=safeAdd(b,oB);c=safeAdd(c,oC);d=safeAdd(d,oD);
+  }
+  return [a,b,c,d].map(n=>('0000000'+(n<0?(n+4294967296).toString(16):n.toString(16))).slice(-8).replace(/(..)/g,(m,p1,o)=>p1[1]+p1[0])).join('').replace(/(..)/g,(m,p1,o)=>p1[1]+p1[0]);
+}
+
+// ═══════════════════════════════════════════════
+//  PASTAS DE DOCUMENTOS
+// ═══════════════════════════════════════════════
+let currentFolder='__all__';
+
+function foldersKey(){return 'emoz-folders-'+(cur?cur.cls+'-'+cur.id:'global');}
+function getFolders(){try{return JSON.parse(localStorage.getItem(foldersKey())||'[]');}catch(e){return[];}}
+function saveFolders(f){localStorage.setItem(foldersKey(),JSON.stringify(f));}
+
+function renderFolders(){
+  const bar=document.getElementById('folderBar');if(!bar)return;
+  const folders=getFolders();
+  const sel=document.getElementById('docFolderSel');
+  bar.innerHTML=`<button class="folder-chip${currentFolder==='__all__'?' on':''}" onclick="selectFolder('__all__',this)">📁 Todos</button>`;
+  if(sel)sel.innerHTML='<option value="">📁 Sem pasta (Geral)</option>';
+  folders.forEach(f=>{
+    bar.innerHTML+=`<button class="folder-chip${currentFolder===f?' on':''}" onclick="selectFolder('${f}',this)">📂 ${f}</button>`;
+    if(sel)sel.innerHTML+=`<option value="${f}">📂 ${f}</option>`;
+  });
+  // Botões de renomear/apagar
+  const rb=document.getElementById('renameFolderBtn');
+  const db=document.getElementById('deleteFolderBtn');
+  const show=currentFolder!=='__all__';
+  if(rb)rb.style.display=show?'':'none';
+  if(db)db.style.display=show?'':'none';
+}
+
+function selectFolder(name,btn){
+  currentFolder=name;
+  document.querySelectorAll('.folder-chip').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const rb=document.getElementById('renameFolderBtn');
+  const db=document.getElementById('deleteFolderBtn');
+  if(rb)rb.style.display=name!=='__all__'?'':'none';
+  if(db)db.style.display=name!=='__all__'?'':'none';
+  renderDocs();
+}
+
+function addFolder(){
+  const inp=document.getElementById('newFolderName');
+  const name=inp.value.trim();
+  if(!name){toast('⚠️','Escreva o nome da pasta!');return;}
+  const folders=getFolders();
+  if(folders.includes(name)){toast('⚠️','Já existe uma pasta com esse nome!');return;}
+  folders.push(name);saveFolders(folders);
+  inp.value='';
+  currentFolder=name;
+  renderFolders();renderDocs();
+  toast('📂','Pasta criada: '+name);
+}
+
+function renameFolder(){
+  if(currentFolder==='__all__')return;
+  const novo=prompt('Novo nome para a pasta "'+currentFolder+'":',currentFolder);
+  if(!novo||novo===currentFolder)return;
+  const folders=getFolders();
+  const idx=folders.indexOf(currentFolder);
+  if(idx<0)return;
+  folders[idx]=novo;saveFolders(folders);
+  currentFolder=novo;
+  renderFolders();renderDocs();
+  toast('✏️','Pasta renomeada para: '+novo);
+}
+
+function deleteFolder(){
+  if(currentFolder==='__all__')return;
+  if(!confirm('Apagar a pasta "'+currentFolder+'"?\nOs documentos dentro desta pasta ficam em "Todos".'))return;
+  const folders=getFolders().filter(f=>f!==currentFolder);
+  saveFolders(folders);
+  currentFolder='__all__';
+  renderFolders();renderDocs();
+  toast('🗑','Pasta apagada.');
+}
+
+async function doRegister(){
+  const nome=document.getElementById('rgNome').value.trim();
+  const email=document.getElementById('rgEmail').value.trim().toLowerCase();
+  const pass=document.getElementById('rgPass').value;
+  const pass2=document.getElementById('rgPass2').value;
+  const prof=document.getElementById('rgProf').value;
+  const tel=document.getElementById('rgTel').value.trim();
+  const msg=document.getElementById('rgMsg');
+  const btn=document.querySelector('#apRegister .auth-btn');
+  if(!nome||!email||!pass||!prof||!tel){showMsg(msg,'err','⚠️ Preencha todos os campos obrigatórios.');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showMsg(msg,'err','⚠️ Email inválido.');return;}
+  if(pass.length<6){showMsg(msg,'err','⚠️ Senha deve ter pelo menos 6 caracteres.');return;}
+  if(pass!==pass2){showMsg(msg,'err','⚠️ As senhas não coincidem.');return;}
+  btn.textContent='⏳ A criar…';btn.disabled=true;
+  showMsg(msg,'ok','⏳ Aguarde…');
+  await fbReady();
+  if(!window._fb){showMsg(msg,'err','❌ Firebase não carregou. Verifique a ligação à internet.');btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;return;}
+  try{
+    const {db,doc,getDoc,setDoc}=window._fb;
+    const ref=doc(db,'users',email);
+    const snap=await getDoc(ref);
+    if(snap.exists()){showMsg(msg,'err','⚠️ Email já cadastrado. Faça login.');btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;return;}
+    const user={id:Date.now(),nome,email,pass:btoa(unescape(encodeURIComponent(pass))),prof,tel,createdAt:new Date().toISOString()};
+    await setDoc(ref,user);
+    showMsg(msg,'ok','✅ Conta criada! A entrar…');
+    setTimeout(()=>{loginUser(user);btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;},800);
+  }catch(e){
+    console.error(e);
+    showMsg(msg,'err','❌ Erro: '+e.message);
+    btn.textContent='✓ Criar Conta Gratuita';btn.disabled=false;
+  }
+}
+
+async function doLogin(){
+  const email=document.getElementById('liEmail').value.trim().toLowerCase();
+  const pass=document.getElementById('liPass').value;
+  const msg=document.getElementById('liMsg');
+  const btn=document.querySelector('#apLogin .auth-btn');
+  if(!email||!pass){showMsg(msg,'err','⚠️ Preencha email e senha.');return;}
+  btn.textContent='⏳ A verificar…';btn.disabled=true;
+  showMsg(msg,'ok','⏳ A verificar…');
+  await fbReady();
+  if(!window._fb){showMsg(msg,'err','❌ Firebase não carregou. Verifique a ligação à internet.');btn.textContent='→ Entrar na Plataforma';btn.disabled=false;return;}
+  try{
+    const {db,doc,getDoc}=window._fb;
+    const ref=doc(db,'users',email);
+    const snap=await getDoc(ref);
+    if(!snap.exists()){showMsg(msg,'err','❌ Email não encontrado. Crie uma conta.');btn.textContent='→ Entrar na Plataforma';btn.disabled=false;return;}
+    const user=snap.data();
+    const passHash=btoa(unescape(encodeURIComponent(pass)));
+    if(user.pass!==passHash){showMsg(msg,'err','❌ Senha incorrecta.');btn.textContent='→ Entrar na Plataforma';btn.disabled=false;return;}
+    showMsg(msg,'ok','✅ Bem-vindo(a)! A entrar…');
+    setTimeout(()=>{loginUser(user);btn.textContent='→ Entrar na Plataforma';btn.disabled=false;},600);
+  }catch(e){
+    console.error(e);
+    showMsg(msg,'err','❌ Erro de ligação: '+e.message);
+    btn.textContent='→ Entrar na Plataforma';btn.disabled=false;
+  }
+}
+
+function loginUser(user){currentUser=user;localStorage.setItem('ensinomoz_session',JSON.stringify(user));showUserBadge();hideOverlay();}
+function doLogout(){currentUser=null;localStorage.removeItem('ensinomoz_session');document.getElementById('userBadge').classList.remove('show');showOverlay();}
 function showMsg(el,type,txt){el.className='auth-msg '+type;el.textContent=txt;}
 
 // ═══════════════════════════════════════════════
-//  DOCUMENTOS — Firebase Firestore
+//  DOCUMENTOS — Firebase Firestore + Pastas
 // ═══════════════════════════════════════════════
-async function fbDocs(){
-  if(window._fbReady) return await window._fb.fbGetDocs();
-  try{return JSON.parse(localStorage.getItem('emoz-docs-'+(cur?cur.cls+'-'+cur.id:'global'))||'[]');}catch(e){return[];}
-}
-async function fbDocsSet(list){
-  if(window._fbReady) return await window._fb.fbSaveDocs(list);
-  localStorage.setItem('emoz-docs-'+(cur?cur.cls+'-'+cur.id:'global'), JSON.stringify(list));
-}
+function docsColName(){return 'docs-'+(cur?cur.cls+'-'+cur.id:'global');}
 
 async function renderDocs(){
   const list=document.getElementById('docList');
@@ -1947,52 +1424,94 @@ async function renderDocs(){
   const badge=document.getElementById('docsUserBadge');
   if(!list)return;
   if(currentUser&&badge)badge.textContent='👤 '+currentUser.nome.split(' ')[0]+' · '+currentUser.prof;
+  renderFolders();
   list.innerHTML='<div style="text-align:center;padding:2rem;color:#aaa;font-size:var(--sm)">⏳ A carregar…</div>';
   empty.style.display='none';
-  const docs = await fbDocs();
-  if(!docs.length){list.innerHTML='';empty.style.display='';return;}
-  const tc={'📋':'#EAF0FC','✏️':'#FDF2E8','📝':'#FCE8EC','📚':'#E8F4EE','🖼️':'#F3EEFB','📎':'#FDF6E3'};
-  list.innerHTML=docs.map((d,i)=>`
-    <div class="doc-card">
-      <div class="doc-icon" style="background:${tc[d.tipo]||'#f5f5f5'}">${d.tipo}</div>
-      <div class="doc-meta">
-        <div class="doc-name">${d.nome}</div>
-        <div class="doc-by">Por <strong>${d.autor}</strong> · ${d.prof} · ${d.tel} · ${new Date(d.ts).toLocaleDateString('pt-MZ')}</div>
-        ${d.desc?`<div style="font-size:var(--xs);color:#666;margin-top:.2rem">${d.desc}</div>`:''}
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
-        <a class="doc-dl" href="${d.link}" target="_blank" rel="noopener">⬇ Baixar</a>
-        ${currentUser&&currentUser.id===d.uid?`<button onclick="docApagar(${i})" style="font-family:var(--fm);font-size:var(--xs);background:none;border:none;color:#ccc;cursor:pointer">🗑 apagar</button>`:''}
-      </div>
-    </div>`).join('');
+  await fbReady();
+  if(!window._fb){list.innerHTML='<div style="color:#c94060;padding:1rem">❌ Sem ligação ao Firebase.</div>';return;}
+  try{
+    const {db,collection,getDocs,query,orderBy}=window._fb;
+    const col=collection(db,docsColName());
+    const q=query(col,orderBy('ts','desc'));
+    const snap=await getDocs(q);
+    let docs=snap.docs.map(d=>({...d.data(),_id:d.id}));
+    // Filtrar por pasta
+    if(currentFolder!=='__all__'){
+      docs=docs.filter(d=>(d.folder||'')=== currentFolder);
+    }
+    if(!docs.length){list.innerHTML='';empty.style.display='';return;}
+    const tc={'📋':'#EAF0FC','✏️':'#EAF0FC','📝':'#FCE8EC','📚':'#E3EEFF','🖼️':'#F3EEFB','📎':'#EAF0FC'};
+    list.innerHTML=docs.map(d=>`
+      <div class="doc-card">
+        <div class="doc-icon" style="background:${tc[d.tipo]||'#EAF0FC'}">${d.tipo}</div>
+        <div class="doc-meta">
+          <div class="doc-name">${d.nome}</div>
+          <div class="doc-by">Por <strong>${d.autor}</strong> · ${d.prof} · ${new Date(d.ts).toLocaleDateString('pt-MZ')}${d.folder?` · 📂 ${d.folder}`:''}</div>
+          ${d.desc?`<div style="font-size:var(--xs);color:#666;margin-top:.2rem">${d.desc}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
+          <a class="doc-dl" href="${d.link}" target="_blank" rel="noopener" download>⬇ Baixar</a>
+          ${currentUser&&currentUser.id==d.uid?`<button onclick="docApagar('${d._id}')" style="font-family:var(--fm);font-size:var(--xs);background:none;border:none;color:#ccc;cursor:pointer">🗑 apagar</button>`:''}
+        </div>
+      </div>`).join('');
+  }catch(e){list.innerHTML='<div style="text-align:center;padding:2rem;color:#c94060;font-size:var(--sm)">❌ Erro ao carregar. Verifique a ligação.</div>';}
 }
+
 async function docEnviar(){
   if(!currentUser){toast('🔒','Faça login para enviar documentos.');return;}
   const nome=document.getElementById('docNome').value.trim();
-  const link=document.getElementById('docLink').value.trim();
+  const linkRaw=document.getElementById('docLink').value.trim();
   const tipo=document.getElementById('docTipo').value;
   const desc=document.getElementById('docDesc').value.trim();
   const msg=document.getElementById('docMsg');
-  if(!nome||!link){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='⚠️ Nome e link são obrigatórios.';return;}
-  if(!/^https?:\/\//.test(link)){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='⚠️ O link deve começar com https://';return;}
-  msg.style.cssText='display:block;background:#FDF6E3;color:#888';msg.textContent='⏳ A enviar…';
+  if(!nome||!linkRaw){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='⚠️ Nome e link são obrigatórios.';return;}
+  if(!/^https?:\/\//.test(linkRaw)){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='⚠️ O link deve começar com https://';return;}
+  // Converte automaticamente qualquer link Google Drive para download directo
+  const link=converterLinkDrive(linkRaw);
+  const folder=document.getElementById('docFolderSel')?.value||'';
+  msg.style.cssText='display:block;background:#EAF0FC;color:#888';msg.textContent='⏳ A enviar…';
   try{
-    const docs = await fbDocs();
-    docs.unshift({nome,link,tipo,desc,autor:currentUser.nome,prof:currentUser.prof,tel:currentUser.tel,uid:currentUser.id,ts:Date.now()});
-    await fbDocsSet(docs);
+    const {db,collection,addDoc}=window._fb;
+    await addDoc(collection(db,docsColName()),{
+      nome,link,tipo,desc,folder,
+      autor:currentUser.nome,prof:currentUser.prof,tel:currentUser.tel,
+      uid:currentUser.id,ts:Date.now()
+    });
     ['docNome','docLink','docDesc'].forEach(x=>document.getElementById(x).value='');
-    msg.style.cssText='display:block;background:#E8F4EE;color:#3c7a5a';msg.textContent='✅ Documento enviado com sucesso!';
+    msg.style.cssText='display:block;background:#E8F4EE;color:#3c7a5a';msg.textContent='✅ Documento enviado!';
     setTimeout(()=>{msg.style.display='none';},2500);
     toast('📁','Documento partilhado!');renderDocs();
-  }catch(e){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='❌ Erro ao enviar. Verifique a internet.';}
+  }catch(e){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='❌ Erro: '+e.message;}
 }
-async function docApagar(i){
+
+// Converte links Google Drive/Docs/Sheets para download/visualização directa
+function converterLinkDrive(url){
+  // Caso 1: /file/d/ID/view ou /file/d/ID/edit
+  const m1=url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m1) return `https://drive.google.com/uc?export=download&id=${m1[1]}`;
+  // Caso 2: open?id=ID
+  const m2=url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+  if(m2) return `https://drive.google.com/uc?export=download&id=${m2[1]}`;
+  // Caso 3: Google Docs → exporta como PDF
+  const m3=url.match(/docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/);
+  if(m3) return `https://docs.google.com/document/d/${m3[1]}/export?format=pdf`;
+  // Caso 4: Google Sheets → exporta como Excel
+  const m4=url.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if(m4) return `https://docs.google.com/spreadsheets/d/${m4[1]}/export?format=xlsx`;
+  // Caso 5: Google Slides → exporta como PowerPoint
+  const m5=url.match(/docs\.google\.com\/presentation\/d\/([a-zA-Z0-9_-]+)/);
+  if(m5) return `https://docs.google.com/presentation/d/${m5[1]}/export?format=pptx`;
+  // Caso 6: uc?id= já correcto
+  if(url.includes('drive.google.com/uc')) return url;
+  // Outros links (Dropbox, OneDrive, etc) — devolve sem alteração
+  return url;
+}
+
+async function docApagar(docId){
   if(!currentUser||!confirm('Apagar este documento?'))return;
   try{
-    const docs = await fbDocs();
-    if(docs[i]?.uid!==currentUser.id){toast('🔒','Só pode apagar os seus documentos.');return;}
-    docs.splice(i,1);
-    await fbDocsSet(docs);
+    const {db,doc,deleteDoc}=window._fb;
+    await deleteDoc(doc(db,docsColName(),docId));
     toast('🗑','Documento apagado.');renderDocs();
   }catch(e){toast('❌','Erro ao apagar.');}
 }
@@ -2003,7 +1522,10 @@ async function docApagar(i){
 renderHome();
 authInit();
 const _origSwitchTab=switchTab;
-switchTab=function(name,btn){_origSwitchTab(name,btn);if(name==='docs')renderDocs();};
+switchTab=function(name,btn){
+  _origSwitchTab(name,btn);
+  if(name==='docs'){currentFolder='__all__';renderFolders();renderDocs();}
+};
 </script>
 </body>
 </html>
