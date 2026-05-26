@@ -12,8 +12,6 @@
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getFirestore,doc,getDoc,setDoc,collection,addDoc,getDocs,deleteDoc,query,orderBy}
   from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import{getStorage,ref,uploadBytesResumable,getDownloadURL,deleteObject}
-  from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyCHf03q-In_nqDn1rQxJdd-Fnh9gkoPaYI",
@@ -27,8 +25,7 @@ const firebaseConfig={
 try{
   const app=initializeApp(firebaseConfig);
   const db=getFirestore(app);
-  const storage=getStorage(app);
-  window._fb={db,doc,getDoc,setDoc,collection,addDoc,getDocs,deleteDoc,query,orderBy,storage,ref,uploadBytesResumable,getDownloadURL,deleteObject};
+  window._fb={db,doc,getDoc,setDoc,collection,addDoc,getDocs,deleteDoc,query,orderBy};
 }catch(e){
   console.error('Firebase init error:',e);
   window._fb=null;
@@ -224,30 +221,6 @@ textarea.finput{min-height:80px;resize:vertical;}
 
 hr.div{border:none;border-top:1.5px solid var(--cream);}
 
-/* UPLOAD */
-.upload-area{border:2px dashed var(--mist);border-radius:var(--r16);padding:var(--s6);text-align:center;cursor:pointer;transition:all .2s;background:var(--paper);position:relative;}
-.upload-area:hover,.upload-area.drag{border-color:var(--cobalt);background:var(--cobalt-t);}
-.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.upload-icon{font-size:2.5rem;margin-bottom:.5rem;}
-.upload-label{font-weight:600;font-size:var(--sm);color:var(--ink);display:block;margin-bottom:.25rem;}
-.upload-hint{font-family:var(--fm);font-size:var(--xs);color:#aaa;}
-.upload-preview{display:none;align-items:center;gap:.75rem;padding:.75rem 1rem;background:#fff;border:1.5px solid var(--cobalt);border-radius:var(--r8);margin-top:.75rem;}
-.upload-preview.show{display:flex;}
-.upload-preview-name{font-size:var(--sm);font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.upload-preview-size{font-family:var(--fm);font-size:var(--xs);color:#aaa;white-space:nowrap;}
-.progress-wrap{background:var(--cream);border-radius:var(--rpill);height:8px;overflow:hidden;margin-top:.75rem;display:none;}
-.progress-wrap.show{display:block;}
-.progress-bar{height:100%;background:var(--cobalt);border-radius:var(--rpill);width:0%;transition:width .3s;}
-.btn-dl-locked{display:inline-flex;align-items:center;gap:var(--s2);font-family:var(--fb);font-weight:600;font-size:var(--xs);background:var(--cream);color:#aaa;padding:var(--s2) var(--s4);border:1.5px dashed var(--mist);border-radius:var(--rpill);cursor:pointer;transition:all .2s;}
-.btn-dl-locked:hover{background:var(--cobalt-t);border-color:var(--cobalt);color:var(--cobalt);}
-.file-type-badge{font-family:var(--fm);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:var(--rpill);font-weight:600;}
-.ft-pdf{background:#FCE8EC;color:var(--rose);border:1px solid var(--rose);}
-.ft-word{background:#DAEAFF;color:var(--cobalt);border:1px solid var(--cobalt);}
-.ft-ppt{background:#FDF2E8;color:var(--saffron);border:1px solid var(--saffron);}
-.ft-video{background:#E5F5F5;color:var(--teal);border:1px solid var(--teal);}
-.ft-img{background:#FDF6E3;color:var(--gold);border:1px solid var(--gold);}
-.ft-other{background:#f0f0f0;color:#666;border:1px solid #ccc;}
-
 footer{background:#0A2A6E;color:var(--paper);padding:var(--s7) 0;margin-top:var(--s8);}
 footer .page{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--s4);}
 .fbrand{font-family:var(--fd);font-size:var(--xl);font-weight:700;letter-spacing:-.02em;}
@@ -376,6 +349,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
     </div>
   </div>
 </div>
+
 
 <div id="authOverlay" class="hidden">
   <div class="auth-box">
@@ -786,7 +760,7 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
       </div>
 
       <div class="msec">
-        <div class="mtitle">📄 Adicionar Ficheiro / Material</div>
+        <div class="mtitle">📄 Adicionar PDF / Ficheiro</div>
         <div class="fgrid">
           <div class="frow"><label class="flabel">Nome do Ficheiro *</label><input class="finput" id="fpNome" placeholder="Ex: Resumo — Capítulo 3"></div>
           <div class="frow"><label class="flabel">Tipo</label>
@@ -795,52 +769,21 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
               <option value="Exercícios">✏️ Exercícios</option>
               <option value="Exame">📝 Exame / Teste</option>
               <option value="Livro">📚 Livro / Manual</option>
-              <option value="Vídeo">🎬 Vídeo</option>
-              <option value="Imagem">🖼️ Imagem</option>
               <option value="Outro">📎 Outro</option>
             </select>
           </div>
         </div>
-
-        <!-- UPLOAD DIRECTO -->
         <div class="frow">
-          <label class="flabel">📁 Carregar Ficheiro (PDF, Word, PPT, Vídeo, Imagem)</label>
-          <div class="upload-area" id="uploadArea"
-            ondragover="event.preventDefault();this.classList.add('drag')"
-            ondragleave="this.classList.remove('drag')"
-            ondrop="handleFileDrop(event)">
-            <input type="file" id="fpFile"
-              accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.mov,.avi,.jpg,.jpeg,.png,.gif,.webp"
-              onchange="handleFileSelect(this)">
-            <div class="upload-icon">☁️</div>
-            <span class="upload-label">Clique ou arraste o ficheiro aqui</span>
-            <span class="upload-hint">PDF · Word · PowerPoint · Vídeo · Imagem — máx. 100MB</span>
-          </div>
-          <div class="upload-preview" id="uploadPreview">
-            <span id="uploadPreviewIcon">📄</span>
-            <span class="upload-preview-name" id="uploadPreviewName">—</span>
-            <span class="upload-preview-size" id="uploadPreviewSize">—</span>
-            <button onclick="clearFileUpload()" style="background:none;border:none;cursor:pointer;color:#aaa;font-size:1rem">✕</button>
-          </div>
-          <div class="progress-wrap" id="uploadProgress">
-            <div class="progress-bar" id="uploadBar"></div>
-          </div>
-          <span class="fhint" id="uploadStatus"></span>
-        </div>
-
-        <!-- OU LINK EXTERNO -->
-        <div class="frow">
-          <label class="flabel">— Ou cole um link externo (Google Drive, Dropbox…) —</label>
+          <label class="flabel">Link de Download (Google Drive, Dropbox…)</label>
           <input class="finput" id="fpLink" placeholder="https://drive.google.com/...">
-          <span class="fhint">Opcional — só necessário se não fizer upload directo.</span>
+          <span class="fhint">Partilhe com acesso público e cole o link aqui.</span>
         </div>
-
+        <div class="frow"><label class="flabel">Tamanho / Páginas (opcional)</label><input class="finput" id="fpSize" placeholder="Ex: 2.4 MB · 18 páginas"></div>
         <div class="frow"><label class="flabel">📁 Pasta (opcional)</label><select class="finput" id="fpFolder"><option value="">Sem pasta</option></select></div>
         <div class="facts">
-          <button class="btn-p" id="btnGuardarPDF" onclick="addPDF()">✓ Guardar Ficheiro</button>
+          <button class="btn-p" onclick="addPDF()">✓ Guardar PDF</button>
           <button class="btn-q" onclick="clearPF()">Limpar</button>
         </div>
-        <div id="fpMsg" style="display:none;margin-top:.75rem;font-family:var(--fm);font-size:var(--xs);padding:.6rem 1rem;border-radius:var(--r8)"></div>
       </div>
 
       <div class="msec">
@@ -1065,19 +1008,10 @@ function renderLessons(){
 // ═══════════════════════════════════════════════
 //  RENDER PDFs
 // ═══════════════════════════════════════════════
-function getFileTypeBadge(name, tipo){
-  const ext = (name||'').split('.').pop().toLowerCase();
-  if(['pdf'].includes(ext)||tipo==='Resumo'||tipo==='Exame'||tipo==='Livro'||tipo==='Exercícios') return '<span class="file-type-badge ft-pdf">PDF</span>';
-  if(['doc','docx'].includes(ext)) return '<span class="file-type-badge ft-word">Word</span>';
-  if(['ppt','pptx'].includes(ext)) return '<span class="file-type-badge ft-ppt">PPT</span>';
-  if(['mp4','mov','avi','webm'].includes(ext)||tipo==='Vídeo') return '<span class="file-type-badge ft-video">Vídeo</span>';
-  if(['jpg','jpeg','png','gif','webp'].includes(ext)||tipo==='Imagem') return '<span class="file-type-badge ft-img">Imagem</span>';
-  return '<span class="file-type-badge ft-other">Ficheiro</span>';
-}
 function renderPDFs(){
   if(!cur)return;
   const d=gd(cur.uid);
-  document.getElementById('pdfsTitle').textContent='Materiais — '+cur.name+' ('+cur.cls+'ª Classe)';
+  document.getElementById('pdfsTitle').textContent='PDFs — '+cur.name+' ('+cur.cls+'ª Classe)';
   const el=document.getElementById('pGrid');
   const em=document.getElementById('pEmpty');
   // Folder bar
@@ -1090,23 +1024,17 @@ function renderPDFs(){
   const filtered=activePDFFolder?d.p.filter(p=>p.folder===activePDFFolder):d.p;
   if(!filtered.length){el.innerHTML='';em.style.display='block';return;}
   em.style.display='none';
-  const ic={Resumo:'📋',Exercícios:'✏️',Exame:'📝',Livro:'📚',Vídeo:'🎬',Imagem:'🖼️',Outro:'📎'};
-  const isLogged = !!currentUser;
+  const ic={Resumo:'📋',Exercícios:'✏️',Exame:'📝',Livro:'📚',Outro:'📎'};
   el.innerHTML=filtered.map((p)=>{
     const realIdx=d.p.indexOf(p);
-    const typeBadge = getFileTypeBadge(p.n, p.tp);
-    const dlBtn = p.lk
-      ? (isLogged
-          ? `<a class="btn-dl" href="${p.lk}" target="_blank" rel="noopener">⬇ Download</a>`
-          : `<button class="btn-dl-locked" onclick="showLoginToast()">🔒 Faça login para baixar</button>`)
-      : '<span style="font-size:var(--xs);color:#aaa">Sem ficheiro</span>';
-    const delBtn = isLogged ? `<button class="btn-o" onclick="delP(${realIdx})">🗑 Eliminar</button>` : '';
     return`<div class="pcard">
       <div class="picon">${ic[p.tp]||'📎'}</div>
-      <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">${typeBadge}</div>
       <div class="pname">${p.n}</div>
       <div class="pinfo">${p.tp}${p.sz?' · '+p.sz:''}${p.folder?' · 📁 '+p.folder:''}</div>
-      <div class="pacts">${dlBtn}${delBtn}</div>
+      <div class="pacts">
+        ${p.lk?'<a class="btn-dl" href="'+p.lk+'" target="_blank" rel="noopener">⬇ Download</a>':'<span style="font-size:var(--xs);color:#aaa">Sem link</span>'}
+        <button class="btn-o" onclick="delP(${realIdx})">🗑 Eliminar</button>
+      </div>
     </div>`;}).join('');
 }
 
@@ -1153,117 +1081,18 @@ function addLesson(){
   save();clearLF();renderLessons();renderManage();updStats();renderHome();
   toast('✓','Aula adicionada com sucesso!');
 }
-// ficheiro seleccionado para upload
-let _selectedFile = null;
-
-function handleFileSelect(input){
-  const file = input.files[0];
-  if(!file) return;
-  _selectedFile = file;
-  showFilePreview(file);
-}
-function handleFileDrop(e){
-  e.preventDefault();
-  document.getElementById('uploadArea').classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if(!file) return;
-  _selectedFile = file;
-  showFilePreview(file);
-}
-function showFilePreview(file){
-  const icons = {pdf:'📄',doc:'📝',docx:'📝',ppt:'📊',pptx:'📊',mp4:'🎬',mov:'🎬',avi:'🎬',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'🖼️',webp:'🖼️'};
-  const ext = file.name.split('.').pop().toLowerCase();
-  const icon = icons[ext] || '📎';
-  const sz = file.size > 1048576 ? (file.size/1048576).toFixed(1)+' MB' : (file.size/1024).toFixed(0)+' KB';
-  document.getElementById('uploadPreviewIcon').textContent = icon;
-  document.getElementById('uploadPreviewName').textContent = file.name;
-  document.getElementById('uploadPreviewSize').textContent = sz;
-  document.getElementById('uploadPreview').classList.add('show');
-  // Auto-fill name if empty
-  const nm = document.getElementById('fpNome');
-  if(!nm.value.trim()) nm.value = file.name.replace(/\.[^.]+$/,'');
-}
-function clearFileUpload(){
-  _selectedFile = null;
-  document.getElementById('fpFile').value = '';
-  document.getElementById('uploadPreview').classList.remove('show');
-  document.getElementById('uploadProgress').classList.remove('show');
-  document.getElementById('uploadStatus').textContent = '';
-  document.getElementById('uploadBar').style.width = '0%';
-}
-function showLoginToast(){
-  toast('🔒','Registe-se ou faça login para descarregar os materiais!');
-}
-function fpMsg(type, txt){
-  const el = document.getElementById('fpMsg');
-  el.style.display = 'block';
-  el.style.background = type==='ok' ? '#D0EAFF' : '#FCE8EC';
-  el.style.color = type==='ok' ? 'var(--cobalt)' : 'var(--rose)';
-  el.style.border = type==='ok' ? '1px solid var(--cobalt)' : '1px solid var(--rose)';
-  el.textContent = txt;
-}
-async function addPDF(){
-  const n = document.getElementById('fpNome').value.trim();
+function addPDF(){
+  const n=document.getElementById('fpNome').value.trim();
   if(!n){toast('⚠️','Escreva o nome do ficheiro!');return;}
-  const folder = document.getElementById('fpFolder').value;
-  const tipo = document.getElementById('fpTipo').value;
-  const linkExterno = document.getElementById('fpLink').value.trim();
-  const btn = document.getElementById('btnGuardarPDF');
-
-  // Se tem ficheiro para upload
-  if(_selectedFile){
-    if(!window._fb){toast('❌','Firebase não carregou.');return;}
-    const {storage, ref, uploadBytesResumable, getDownloadURL} = window._fb;
-    btn.disabled = true; btn.textContent = '⏳ A enviar…';
-    fpMsg('ok','⏳ A carregar ficheiro… aguarde.');
-    document.getElementById('uploadProgress').classList.add('show');
-    const bar = document.getElementById('uploadBar');
-    const status = document.getElementById('uploadStatus');
-    const ext = _selectedFile.name.split('.').pop().toLowerCase();
-    const path = `materiais/${cur.uid}/${Date.now()}_${_selectedFile.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-    const storageRef = ref(storage, path);
-    const task = uploadBytesResumable(storageRef, _selectedFile);
-    task.on('state_changed',
-      snap=>{
-        const pct = Math.round(snap.bytesTransferred/snap.totalBytes*100);
-        bar.style.width = pct+'%';
-        status.textContent = `A enviar… ${pct}%`;
-      },
-      err=>{
-        btn.disabled=false; btn.textContent='✓ Guardar Ficheiro';
-        fpMsg('err','❌ Erro no upload: '+err.message);
-        status.textContent='';
-      },
-      async()=>{
-        const url = await getDownloadURL(task.snapshot.ref);
-        const sz = _selectedFile.size > 1048576
-          ? (_selectedFile.size/1048576).toFixed(1)+' MB'
-          : (_selectedFile.size/1024).toFixed(0)+' KB';
-        gd(cur.uid).p.push({n,tp:tipo,lk:url,sz,folder:folder||'',storagePath:path});
-        save(); clearPF(); renderPDFs(); renderManage(); updStats(); renderHome();
-        btn.disabled=false; btn.textContent='✓ Guardar Ficheiro';
-        toast('✓','Ficheiro enviado com sucesso!');
-        fpMsg('ok','✅ Ficheiro guardado!');
-      }
-    );
-    return;
-  }
-
-  // Sem ficheiro — usa link externo
-  if(!linkExterno){toast('⚠️','Faça upload de um ficheiro ou cole um link externo.');return;}
-  gd(cur.uid).p.push({n,tp:tipo,lk:linkExterno,sz:'',folder:folder||''});
-  save(); clearPF(); renderPDFs(); renderManage(); updStats(); renderHome();
-  toast('✓','Ficheiro adicionado com sucesso!');
+  const folder=document.getElementById('fpFolder').value;
+  gd(cur.uid).p.push({n,tp:document.getElementById('fpTipo').value,lk:document.getElementById('fpLink').value.trim(),sz:document.getElementById('fpSize').value.trim(),folder:folder||''});
+  save();clearPF();renderPDFs();renderManage();updStats();renderHome();
+  toast('✓','PDF adicionado com sucesso!');
 }
 function delL(i){if(!confirm('Eliminar esta aula?'))return;gd(cur.uid).l.splice(i,1);save();renderLessons();renderManage();updStats();renderHome();toast('🗑','Aula eliminada.');}
-function delP(i){if(!confirm('Eliminar este ficheiro?'))return;gd(cur.uid).p.splice(i,1);save();renderPDFs();renderManage();updStats();renderHome();toast('🗑','Ficheiro eliminado.');}
+function delP(i){if(!confirm('Eliminar este PDF?'))return;gd(cur.uid).p.splice(i,1);save();renderPDFs();renderManage();updStats();renderHome();toast('🗑','PDF eliminado.');}
 function clearLF(){['faTitulo','faDur','faDesc','faVideo'].forEach(id=>document.getElementById(id).value='');}
-function clearPF(){
-  ['fpNome','fpLink'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fpTipo').selectedIndex=0;
-  clearFileUpload();
-  const m=document.getElementById('fpMsg'); if(m) m.style.display='none';
-}
+function clearPF(){['fpNome','fpLink','fpSize'].forEach(id=>document.getElementById(id).value='');document.getElementById('fpTipo').selectedIndex=0;}
 
 // ═══════════════════════════════════════════════
 //  NAVEGAÇÃO
@@ -1674,4 +1503,204 @@ async function docEnviar(){
   const linkRaw=document.getElementById('docLink').value.trim();
   const tipo=document.getElementById('docTipo').value;
   const desc=document.getElementById('docDesc').value.trim();
-  const msg=docum
+  const msg=document.getElementById('docMsg');
+  if(!nome||!linkRaw){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='⚠️ Nome e link são obrigatórios.';return;}
+  if(!/^https?:\/\//.test(linkRaw)){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='⚠️ O link deve começar com https://';return;}
+  // Converte automaticamente qualquer link Google Drive para download directo
+  const link=converterLinkDrive(linkRaw);
+  msg.style.cssText='display:block;background:#FDF6E3;color:#888';msg.textContent='⏳ A enviar…';
+  try{
+    const {db,collection,addDoc}=window._fb;
+    await addDoc(collection(db,docsColName()),{
+      nome,link,tipo,desc,
+      autor:currentUser.nome,prof:currentUser.prof,tel:currentUser.tel,
+      uid:currentUser.id,ts:Date.now()
+    });
+    ['docNome','docLink','docDesc'].forEach(x=>document.getElementById(x).value='');
+    msg.style.cssText='display:block;background:#E8F4EE;color:#3c7a5a';msg.textContent='✅ Documento enviado!';
+    setTimeout(()=>{msg.style.display='none';},2500);
+    toast('📁','Documento partilhado!');renderDocs();
+  }catch(e){msg.style.cssText='display:block;background:#FCE8EC;color:#c94060';msg.textContent='❌ Erro: '+e.message;}
+}
+
+// Converte links Google Drive/Docs/Sheets para download/visualização directa
+function converterLinkDrive(url){
+  // Caso 1: /file/d/ID/view ou /file/d/ID/edit
+  const m1=url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m1) return `https://drive.google.com/uc?export=download&id=${m1[1]}`;
+  // Caso 2: open?id=ID
+  const m2=url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+  if(m2) return `https://drive.google.com/uc?export=download&id=${m2[1]}`;
+  // Caso 3: Google Docs → exporta como PDF
+  const m3=url.match(/docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/);
+  if(m3) return `https://docs.google.com/document/d/${m3[1]}/export?format=pdf`;
+  // Caso 4: Google Sheets → exporta como Excel
+  const m4=url.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if(m4) return `https://docs.google.com/spreadsheets/d/${m4[1]}/export?format=xlsx`;
+  // Caso 5: Google Slides → exporta como PowerPoint
+  const m5=url.match(/docs\.google\.com\/presentation\/d\/([a-zA-Z0-9_-]+)/);
+  if(m5) return `https://docs.google.com/presentation/d/${m5[1]}/export?format=pptx`;
+  // Caso 6: uc?id= já correcto
+  if(url.includes('drive.google.com/uc')) return url;
+  // Outros links (Dropbox, OneDrive, etc) — devolve sem alteração
+  return url;
+}
+
+async function docApagar(docId){
+  if(!currentUser||!confirm('Apagar este documento?'))return;
+  try{
+    const {db,doc,deleteDoc}=window._fb;
+    await deleteDoc(doc(db,docsColName(),docId));
+    toast('🗑','Documento apagado.');renderDocs();
+  }catch(e){toast('❌','Erro ao apagar.');}
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  PAINEL DO PROPRIETÁRIO
+// ═══════════════════════════════════════════════
+// ⚠️  Altere este email para o seu email de proprietário
+const OWNER_EMAIL = 'angelobola7@gmail.com';
+
+let _adminAllUsers = [];
+
+function isOwner(){
+  return currentUser && currentUser.email && currentUser.email.toLowerCase() === OWNER_EMAIL.toLowerCase();
+}
+
+function showUserBadge(){
+  const b=document.getElementById('userBadge');if(!currentUser||!b)return;
+  b.classList.add('show');
+  const avatarEl=document.getElementById('userAvatar');
+  const textEl=document.getElementById('userAvatarText');
+  document.getElementById('userName').textContent=currentUser.nome.split(' ')[0];
+  if(currentUser.email){
+    const avatarUrl=`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.nome)}&backgroundColor=1a4fbf&textColor=ffffff&fontSize=40`;
+    avatarEl.innerHTML=`<img src="${avatarUrl}" alt="${currentUser.nome}" onerror="this.style.display='none';document.getElementById('userAvatarText').style.display='flex'">`;
+  } else {
+    if(textEl) textEl.textContent=currentUser.nome.charAt(0).toUpperCase();
+  }
+  // Mostrar botão admin apenas ao proprietário
+  const adminBtn = document.getElementById('adminBtn');
+  if(adminBtn){
+    if(isOwner()) adminBtn.classList.add('show');
+    else adminBtn.classList.remove('show');
+  }
+}
+
+async function openAdmin(){
+  if(!isOwner()){toast('🔒','Acesso restrito ao proprietário.');return;}
+  document.getElementById('adminOverlay').classList.remove('hidden');
+  document.getElementById('adminSearch').value='';
+  await loadAdminUsers();
+}
+
+function closeAdmin(){
+  document.getElementById('adminOverlay').classList.add('hidden');
+}
+
+// Fechar com ESC
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeAdmin();
+});
+
+async function loadAdminUsers(){
+  if(!isOwner())return;
+  const listEl=document.getElementById('adminUserList');
+  const countEl=document.getElementById('adminTotalCount');
+  listEl.innerHTML='<div class="admin-loading">⏳ A carregar utilizadores…</div>';
+  countEl.textContent='—';
+  try{
+    const {db,collection,getDocs}=window._fb;
+    const snap=await getDocs(collection(db,'users'));
+    _adminAllUsers=snap.docs.map(d=>({...d.data(),_docId:d.id}));
+    // Ordenar: proprietário primeiro, depois por data de criação desc
+    _adminAllUsers.sort((a,b)=>{
+      if(a.email===OWNER_EMAIL) return -1;
+      if(b.email===OWNER_EMAIL) return 1;
+      return (b.createdAt||'').localeCompare(a.createdAt||'');
+    });
+    countEl.textContent=_adminAllUsers.length;
+    renderAdminList(_adminAllUsers);
+  }catch(e){
+    listEl.innerHTML='<div class="admin-empty">❌ Erro ao carregar: '+e.message+'</div>';
+  }
+}
+
+function filterAdminUsers(q){
+  if(!q.trim()){renderAdminList(_adminAllUsers);return;}
+  const t=q.toLowerCase();
+  const filtered=_adminAllUsers.filter(u=>
+    (u.nome||'').toLowerCase().includes(t)||
+    (u.email||'').toLowerCase().includes(t)||
+    (u.prof||'').toLowerCase().includes(t)||
+    (u.tel||'').toLowerCase().includes(t)
+  );
+  renderAdminList(filtered);
+}
+
+function renderAdminList(users){
+  const listEl=document.getElementById('adminUserList');
+  if(!users.length){
+    listEl.innerHTML='<div class="admin-empty">😶 Nenhum utilizador encontrado.</div>';
+    return;
+  }
+  const profColors={
+    'Estudante':'background:#DAEAFF;color:#1A4FBF;border:1px solid #1A4FBF',
+    'Professor(a)':'background:#D0EAFF;color:#1A6FA0;border:1px solid #1A6FA0',
+    'Encarregado de Educação':'background:#FDF6E3;color:#C9A84C;border:1px solid #C9A84C',
+    'Director(a) de Escola':'background:#FCE8EC;color:#C94060;border:1px solid #C94060',
+    'Técnico de Educação':'background:#E5F5F5;color:#1A8A8A;border:1px solid #1A8A8A',
+    'Outro':'background:#f0f0f0;color:#666;border:1px solid #ccc'
+  };
+  listEl.innerHTML=users.map((u,idx)=>{
+    const isMe=(u.email&&u.email.toLowerCase()===OWNER_EMAIL.toLowerCase());
+    const initials=(u.nome||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const date=u.createdAt?new Date(u.createdAt).toLocaleDateString('pt-MZ'):'—';
+    const badgeStyle=profColors[u.prof]||profColors['Outro'];
+    return`<div class="admin-user-row${isMe?' admin-owner-row':''}">
+      <div class="admin-user-avatar" style="${isMe?'background:#b8860b;border-color:#FFD700':''}">
+        ${isMe?'👑':initials}
+      </div>
+      <div class="admin-user-info">
+        <div class="admin-user-name">${u.nome||'(sem nome)'} ${isMe?'<span style="font-family:var(--fm);font-size:var(--xs);color:#b8860b">(Você · Proprietário)</span>':''}</div>
+        <div class="admin-user-meta">📧 ${u.email||'—'} · 📱 ${u.tel||'—'} · 📅 ${date}</div>
+      </div>
+      <span class="admin-badge" style="${isMe?'background:#FDF6E3;color:#b8860b;border:1px solid #C9A84C':badgeStyle}">${u.prof||'Outro'}</span>
+      ${isMe
+        ?'<span style="font-family:var(--fm);font-size:var(--xs);color:#b8860b;padding:.3rem .75rem">👑 Owner</span>'
+        :`<button class="admin-del-btn" onclick="adminDeleteUser('${u._docId}','${(u.nome||'').replace(/'/g,"\\'")}',this)">🗑 Remover</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+async function adminDeleteUser(docId,nome,btn){
+  if(!isOwner()){toast('🔒','Sem permissão.');return;}
+  if(!confirm(`Remover o utilizador "${nome}" permanentemente?\n\nEsta acção não pode ser desfeita.`))return;
+  btn.disabled=true;
+  btn.textContent='⏳…';
+  try{
+    const {db,doc,deleteDoc}=window._fb;
+    await deleteDoc(doc(db,'users',docId));
+    // Remover da lista local
+    _adminAllUsers=_adminAllUsers.filter(u=>u._docId!==docId);
+    document.getElementById('adminTotalCount').textContent=_adminAllUsers.length;
+    const q=document.getElementById('adminSearch').value;
+    filterAdminUsers(q);
+    toast('🗑','Utilizador "'+nome+'" removido.');
+  }catch(e){
+    btn.disabled=false;btn.textContent='🗑 Remover';
+    toast('❌','Erro ao remover: '+e.message);
+  }
+}
+
+renderHome();
+authInit();
+const _origSwitchTab=switchTab;
+switchTab=function(name,btn){_origSwitchTab(name,btn);if(name==='docs')renderDocs();};
+</script>
+</body>
+</html>
