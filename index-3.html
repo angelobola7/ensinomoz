@@ -12,8 +12,6 @@
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getFirestore,doc,getDoc,setDoc,collection,addDoc,getDocs,deleteDoc,query,orderBy}
   from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import{getStorage,ref,uploadBytesResumable,getDownloadURL}
-  from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyCHf03q-In_nqDn1rQxJdd-Fnh9gkoPaYI",
@@ -27,8 +25,7 @@ const firebaseConfig={
 try{
   const app=initializeApp(firebaseConfig);
   const db=getFirestore(app);
-  const storage=getStorage(app);
-  window._fb={db,doc,getDoc,setDoc,collection,addDoc,getDocs,deleteDoc,query,orderBy,storage,ref,uploadBytesResumable,getDownloadURL};
+  window._fb={db,doc,getDoc,setDoc,collection,addDoc,getDocs,deleteDoc,query,orderBy};
 }catch(e){
   console.error('Firebase init error:',e);
   window._fb=null;
@@ -230,8 +227,10 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
 .finfo{font-family:var(--fm);font-size:var(--xs);color:#555;text-transform:uppercase;letter-spacing:.1em;text-align:right;line-height:2;}
 
 /* ══ AUTH ══ */
-#authOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(10,26,110,.93);backdrop-filter:blur(6px);}
+#authOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(10,26,110,1);backdrop-filter:blur(12px);}
 #authOverlay.hidden{display:none;}
+body.locked{overflow:hidden;pointer-events:none;}
+body.locked #authOverlay{pointer-events:all;}
 .auth-box{background:var(--paper);border:2px solid var(--cobalt);border-radius:var(--r16);box-shadow:var(--sh2);width:100%;max-width:480px;overflow:hidden;}
 .auth-header{background:#0A2A6E;padding:1.5rem 2rem;text-align:center;}
 .auth-logo{font-family:var(--fd);font-size:var(--xl);font-weight:700;color:var(--paper);letter-spacing:-.02em;}
@@ -323,20 +322,9 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
 .admin-loading{text-align:center;padding:3rem 1rem;color:#aaa;font-size:var(--sm);}
 .admin-owner-row{background:rgba(255,215,0,.06)!important;border:1px solid rgba(255,215,0,.2)!important;}
 .admin-owner-badge{color:#b8860b;background:#FDF6E3;border:1px solid #C9A84C;}
-/* UPLOAD */
-.upload-area{border:2px dashed var(--mist);border-radius:var(--r8);padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--paper);position:relative;margin-bottom:.5rem;}
-.upload-area:hover,.upload-area.drag{border-color:var(--cobalt);background:var(--cobalt-t);}
-.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.upload-preview{display:none;align-items:center;gap:.75rem;padding:.6rem 1rem;background:#fff;border:1.5px solid var(--cobalt);border-radius:var(--r8);margin-bottom:.5rem;font-size:var(--sm);}
-.upload-preview.show{display:flex;}
-.upload-preview-name{flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.upload-preview-size{font-family:var(--fm);font-size:var(--xs);color:#aaa;white-space:nowrap;}
-.progress-wrap{background:var(--cream);border-radius:var(--rpill);height:8px;overflow:hidden;margin-bottom:.5rem;display:none;}
-.progress-wrap.show{display:block;}
-.progress-bar{height:100%;background:var(--cobalt);border-radius:var(--rpill);width:0%;transition:width .2s;}
 </style>
 </head>
-<body>
+<body class="locked">
 
 <!-- ADMIN PANEL OVERLAY -->
 <div id="adminOverlay" class="hidden">
@@ -789,31 +777,14 @@ footer .page{display:flex;justify-content:space-between;align-items:center;flex-
           </div>
         </div>
         <div class="frow">
-          <label class="flabel">📁 Carregar do seu dispositivo (PDF, Word, PPT, Vídeo, Imagem)</label>
-          <div class="upload-area" id="uploadArea"
-            ondragover="event.preventDefault();this.classList.add('drag')"
-            ondragleave="this.classList.remove('drag')"
-            ondrop="handleFileDrop(event)">
-            <input type="file" id="fpFile"
-              accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.mov,.jpg,.jpeg,.png,.gif"
-              onchange="handleFileSelect(this)">
-            <div style="font-size:2rem;margin-bottom:.4rem">☁️</div>
-            <div style="font-weight:600;font-size:var(--sm);margin-bottom:.2rem">Clique ou arraste o ficheiro aqui</div>
-            <div style="font-family:var(--fm);font-size:var(--xs);color:#aaa">PDF · Word · PowerPoint · Vídeo · Imagem</div>
-          </div>
-          <div class="upload-preview" id="uploadPreview">
-            <span id="uploadPreviewIcon">📄</span>
-            <span class="upload-preview-name" id="uploadPreviewName"></span>
-            <span class="upload-preview-size" id="uploadPreviewSize"></span>
-            <button onclick="clearFileUpload()" style="background:none;border:none;cursor:pointer;color:#aaa;font-size:1rem;margin-left:auto">✕</button>
-          </div>
-          <div class="progress-wrap" id="uploadProgress"><div class="progress-bar" id="uploadBar"></div></div>
-          <span class="fhint" id="uploadStatus"></span>
+          <label class="flabel">Link de Download (Google Drive, Dropbox…)</label>
+          <input class="finput" id="fpLink" placeholder="https://drive.google.com/...">
+          <span class="fhint">Partilhe com acesso público e cole o link aqui.</span>
         </div>
         <div class="frow"><label class="flabel">Tamanho / Páginas (opcional)</label><input class="finput" id="fpSize" placeholder="Ex: 2.4 MB · 18 páginas"></div>
         <div class="frow"><label class="flabel">📁 Pasta (opcional)</label><select class="finput" id="fpFolder"><option value="">Sem pasta</option></select></div>
         <div class="facts">
-          <button class="btn-p" id="btnGuardarPDF" onclick="addPDF()">✓ Guardar PDF</button>
+          <button class="btn-p" onclick="addPDF()">✓ Guardar PDF</button>
           <button class="btn-q" onclick="clearPF()">Limpar</button>
         </div>
       </div>
@@ -1113,71 +1084,18 @@ function addLesson(){
   save();clearLF();renderLessons();renderManage();updStats();renderHome();
   toast('✓','Aula adicionada com sucesso!');
 }
-let _selectedFile=null;
-function handleFileSelect(input){
-  const file=input.files[0]; if(!file)return;
-  _selectedFile=file; showUploadPreview(file);
-}
-function handleFileDrop(e){
-  e.preventDefault(); document.getElementById('uploadArea').classList.remove('drag');
-  const file=e.dataTransfer.files[0]; if(!file)return;
-  _selectedFile=file; showUploadPreview(file);
-}
-function showUploadPreview(file){
-  const icons={pdf:'📄',doc:'📝',docx:'📝',ppt:'📊',pptx:'📊',mp4:'🎬',mov:'🎬',jpg:'🖼️',jpeg:'🖼️',png:'🖼️',gif:'🖼️'};
-  const ext=file.name.split('.').pop().toLowerCase();
-  const sz=file.size>1048576?(file.size/1048576).toFixed(1)+' MB':(file.size/1024).toFixed(0)+' KB';
-  document.getElementById('uploadPreviewIcon').textContent=icons[ext]||'📎';
-  document.getElementById('uploadPreviewName').textContent=file.name;
-  document.getElementById('uploadPreviewSize').textContent=sz;
-  document.getElementById('uploadPreview').classList.add('show');
-  const nm=document.getElementById('fpNome');
-  if(!nm.value.trim()) nm.value=file.name.replace(/\.[^.]+$/,'');
-}
-function clearFileUpload(){
-  _selectedFile=null;
-  document.getElementById('fpFile').value='';
-  document.getElementById('uploadPreview').classList.remove('show');
-  document.getElementById('uploadProgress').classList.remove('show');
-  document.getElementById('uploadStatus').textContent='';
-  document.getElementById('uploadBar').style.width='0%';
-}
-async function addPDF(){
+function addPDF(){
   const n=document.getElementById('fpNome').value.trim();
   if(!n){toast('⚠️','Escreva o nome do ficheiro!');return;}
   const folder=document.getElementById('fpFolder').value;
-  const tp=document.getElementById('fpTipo').value;
-  const sz=document.getElementById('fpSize').value.trim();
-  if(_selectedFile){
-    if(!window._fb){toast('❌','Firebase não carregou.');return;}
-    const {storage,ref,uploadBytesResumable,getDownloadURL}=window._fb;
-    const btn=document.getElementById('btnGuardarPDF');
-    btn.disabled=true; btn.textContent='⏳ A enviar…';
-    document.getElementById('uploadProgress').classList.add('show');
-    const bar=document.getElementById('uploadBar');
-    const status=document.getElementById('uploadStatus');
-    const path=`materiais/${cur.uid}/${Date.now()}_${_selectedFile.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-    const task=uploadBytesResumable(ref(storage,path),_selectedFile);
-    task.on('state_changed',
-      snap=>{const p=Math.round(snap.bytesTransferred/snap.totalBytes*100);bar.style.width=p+'%';status.textContent='A enviar… '+p+'%';},
-      err=>{btn.disabled=false;btn.textContent='✓ Guardar PDF';toast('❌','Erro: '+err.message);},
-      async()=>{
-        const url=await getDownloadURL(task.snapshot.ref);
-        const fileSz=_selectedFile.size>1048576?(_selectedFile.size/1048576).toFixed(1)+' MB':(_selectedFile.size/1024).toFixed(0)+' KB';
-        gd(cur.uid).p.push({n,tp,lk:url,sz:sz||fileSz,folder:folder||''});
-        save();clearPF();renderPDFs();renderManage();updStats();renderHome();
-        btn.disabled=false;btn.textContent='✓ Guardar PDF';
-        toast('✓','Ficheiro enviado com sucesso!');
-      }
-    );
-    return;
-  }
-  toast('⚠️','Seleccione um ficheiro para carregar.');
+  gd(cur.uid).p.push({n,tp:document.getElementById('fpTipo').value,lk:document.getElementById('fpLink').value.trim(),sz:document.getElementById('fpSize').value.trim(),folder:folder||''});
+  save();clearPF();renderPDFs();renderManage();updStats();renderHome();
+  toast('✓','PDF adicionado com sucesso!');
 }
 function delL(i){if(!confirm('Eliminar esta aula?'))return;gd(cur.uid).l.splice(i,1);save();renderLessons();renderManage();updStats();renderHome();toast('🗑','Aula eliminada.');}
 function delP(i){if(!confirm('Eliminar este PDF?'))return;gd(cur.uid).p.splice(i,1);save();renderPDFs();renderManage();updStats();renderHome();toast('🗑','PDF eliminado.');}
 function clearLF(){['faTitulo','faDur','faDesc','faVideo'].forEach(id=>document.getElementById(id).value='');}
-function clearPF(){['fpNome','fpSize'].forEach(id=>document.getElementById(id).value='');document.getElementById('fpTipo').selectedIndex=0;clearFileUpload();}
+function clearPF(){['fpNome','fpLink','fpSize'].forEach(id=>document.getElementById(id).value='');document.getElementById('fpTipo').selectedIndex=0;}
 
 // ═══════════════════════════════════════════════
 //  NAVEGAÇÃO
@@ -1368,8 +1286,8 @@ async function authInit(){
     showOverlay();
   }
 }
-function showOverlay(){document.getElementById('authOverlay').classList.remove('hidden');}
-function hideOverlay(){document.getElementById('authOverlay').classList.add('hidden');}
+function showOverlay(){document.getElementById('authOverlay').classList.remove('hidden');document.body.classList.add('locked');}
+function hideOverlay(){document.getElementById('authOverlay').classList.add('hidden');document.body.classList.remove('locked');}
 function authTab(t){
   const isRecover=(t==='recover');
   const isLogin=(t==='login');
